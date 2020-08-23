@@ -16,9 +16,9 @@ import random
 
 class MainWindow():
 
-    def __init__(self, main, jsonfile):
+    def __init__(self, main, jsonfile, media_home):
 
-        self.media_home = "/media/pi/Seagate Expansion Drive"
+        self.media_home = media_home
         self.media_profile = ""
         self.main=main
         self.main.attributes("-fullscreen", True)
@@ -239,8 +239,6 @@ class MainWindow():
         #  complete path of the filename of the selected entry
         if track_file != '' and track_file[0]=="+":
             track_file=self.media_home+track_file[1:]
-        elif track_file[0] == "@":
-            track_file=self.media_profile+track_file[1:]
         return track_file
 
     def quit(self,event):
@@ -248,5 +246,5 @@ class MainWindow():
 
 
 root = Tk()
-MainWindow(root,sys.argv[1])
+MainWindow(root,sys.argv[1],sys.argv[2])
 root.mainloop()
