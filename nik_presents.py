@@ -12,6 +12,8 @@ from gpiozero import MotionSensor
 import time
 import subprocess
 import random
+import argparse
+import os
 
 
 class MainWindow():
@@ -245,6 +247,28 @@ class MainWindow():
         self.main.destroy()
 
 
+parser = argparse.ArgumentParser()
+parser.add_argument("--jsonfile", help="JSON file with tracks", required=True)
+parser.add_argument("--mediadir", help="Root directory for media", required=True)
+args = parser.parse_args()
+
+if (not os.path.exists(args.jsonfile)):
+    print("Error: JSON file '"+args.jsonfile+"' not found.", file=sys.stdout)
+    sys.exit(1)
+
+if (not os.path.isfile(args.jsonfile)):
+    print("Error: Path '"+args.jsonfile+"' is not a file.", file=sys.stdout)
+    sys.exit(1)
+    
+if (not os.path.exists(args.mediadir)):
+    print("Error: Media directory '"+args.mediadir+"' does not exist.", file=sys.stdout)
+    sys.exit(1)
+    
+if (not os.path.isdir(args.mediadir)):
+    print("Error: Media directory path '"+args.mediadir+"' is not a directory.", file=sys.stdout)
+    sys.exit(1)
+
+
 root = Tk()
-MainWindow(root,sys.argv[1],sys.argv[2])
+MainWindow(root,args.jsonfile,args.mediadir)
 root.mainloop()
