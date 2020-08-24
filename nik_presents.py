@@ -81,7 +81,7 @@ class MainWindow():
 
     def onClick(self,event):
         x=event.x
-        if self.verbose: print ("screen click, "+self.current_track["type"]+" track, X value: "+x, flush=True)
+        if self.verbose: print ("screen click, "+self.current_track["type"]+" track, X value: "+str(x), flush=True)
         if (x<640):
             if self.verbose: print ("going to previous track", flush=True)
             self.prev_track()
