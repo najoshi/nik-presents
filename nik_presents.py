@@ -18,7 +18,7 @@ import os
 
 class MainWindow():
 
-    def __init__(self, main, jsonfile, media_home):
+    def __init__(self, main, jsonfile, media_home, timeout, duration):
 
         self.media_home = media_home
         self.media_profile = ""
@@ -48,16 +48,17 @@ class MainWindow():
         self.current_track=None
         self.running = True
         self.rect=None
+        self.timeout = timeout
+        self.duration = 1000 * duration
         self.pir = MotionSensor(17)
         self.last_motion_time = time.time()
-        self.MOTION_LIMIT = 120
         
         self.pir.when_motion = self.do_motion
         self.main.after(1,self.check_limit)
         self.next_track()
         
     def check_limit(self):
-        if (self.running and (time.time() > (self.last_motion_time + self.MOTION_LIMIT))):
+        if (self.running and (time.time() > (self.last_motion_time + self.timeout))):
             print("timeout reached, turning off", flush=True)
             self.running = False
             self.pause_on()
@@ -116,7 +117,7 @@ class MainWindow():
         
         if (self.current_track["type"] == "image"):
             self.canvas.delete(self.pause_text)
-            self.image_timer = self.main.after(8000, self.next_track)
+            self.image_timer = self.main.after(self.duration, self.next_track)
             
         elif (self.current_track["type"] == "video"):
             self.player.video_set_marquee_int(VideoMarqueeOption.Enable, 0)
@@ -248,12 +249,10 @@ class MainWindow():
             self.rect = self.canvas.create_rectangle(bbox, outline="black", fill="black")
             self.canvas.tag_raise(self.annot,self.rect)
 
-        
         self.canvas.itemconfig(self.image_on_canvas, image = self.img)
-        
-        
-        self.image_timer = self.main.after(8000, self.next_track)
-        
+        self.image_timer = self.main.after(self.duration, self.next_track)
+
+
     def complete_path(self,track_file):
         #  complete path of the filename of the selected entry
         if track_file != '' and track_file[0]=="+":
@@ -265,8 +264,10 @@ class MainWindow():
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--jsonfile", help="JSON file with tracks", required=True)
-parser.add_argument("--mediadir", help="Root directory for media", required=True)
+parser.add_argument("--jsonfile", help="JSON file with tracks.", required=True)
+parser.add_argument("--mediadir", help="Root directory for media.", required=True)
+parser.add_argument("--timeout", help="Number of seconds for PIR timeout. (Default 120).", default=120)
+parser.add_argument("--duration", help="Number of seconds images are show (Default 8).", default=8)
 args = parser.parse_args()
 
 if (not os.path.exists(args.jsonfile)):
@@ -287,5 +288,5 @@ if (not os.path.isdir(args.mediadir)):
 
 
 root = Tk()
-MainWindow(root,args.jsonfile,args.mediadir)
+MainWindow(root, args.jsonfile, args.mediadir, args.timeout, args.duration)
 root.mainloop()
