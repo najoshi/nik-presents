@@ -17,7 +17,7 @@ import os
 
 class MainWindow():
 
-    def __init__(self, main, jsonfile, media_home, timeout, duration):
+    def __init__(self, main, jsonfile, media_home, timeout, duration, verbose):
 
         self.media_home = media_home
         self.media_profile = ""
@@ -38,6 +38,7 @@ class MainWindow():
         self.image_on_canvas = self.canvas.create_image(960, 540, anchor = CENTER)
         self.canvas.bind('<Button-1>',self.onClick)
 
+        self.verbose = verbose
         self.image_timer=None
         self.video_timer=None
         self.annot=None
@@ -58,14 +59,14 @@ class MainWindow():
         
     def check_limit(self):
         if (self.running and (time.time() > (self.last_motion_time + self.timeout))):
-            print("timeout reached, turning off", flush=True)
+            if self.verbose: print("timeout reached, turning off", flush=True)
             self.running = False
             self.pause_on()
             self.turn_off_monitor()
         self.main.after(100,self.check_limit)
         
     def do_motion(self):
-        print("detected motion", flush=True)
+        if self.verbose: print("detected motion", flush=True)
         self.last_motion_time = time.time()
         if (not self.running):
             self.running = True
@@ -80,7 +81,7 @@ class MainWindow():
 
     def onClick(self,event):
         x=event.x
-        #print (self.current_track["type"],"X:",x)
+        if self.verbose: print (self.current_track["type"],"X:",x)
         if (x<640):
             self.prev_track()
         elif (x>=640 and x<1280):
@@ -163,7 +164,8 @@ class MainWindow():
             
         self.current_track = self.tracks[self.track_number]
         
-        print("playing track "+str(self.track_number)+": "+self.current_track['location'], flush=True)
+        if self.verbose:
+            print("playing track "+str(self.track_number)+": "+self.current_track['location'], flush=True)
         
         if (self.current_track["type"] == "image"):
             self.update_image()
@@ -265,6 +267,7 @@ parser.add_argument("--jsonfile", help="JSON file with tracks.", required=True)
 parser.add_argument("--mediadir", help="Root directory for media.", required=True)
 parser.add_argument("--timeout", help="Number of seconds for PIR timeout (Default 120).", default=120)
 parser.add_argument("--duration", help="Number of seconds images are shown (Default 8).", default=8)
+parser.add_argument("--verbose", help="Informational output to terminal.", default=False, action='store_true')
 args = parser.parse_args()
 
 if (not os.path.exists(args.jsonfile)):
@@ -285,5 +288,5 @@ if (not os.path.isdir(args.mediadir)):
 
 
 root = Tk()
-MainWindow(root, args.jsonfile, args.mediadir, args.timeout, args.duration)
+MainWindow(root, args.jsonfile, args.mediadir, args.timeout, args.duration, args.verbose)
 root.mainloop()
