@@ -81,15 +81,19 @@ class MainWindow():
 
     def onClick(self,event):
         x=event.x
-        if self.verbose: print (self.current_track["type"],"X:",x)
+        if self.verbose: print ("screen click, "+self.current_track["type"]+" track, X value: "+x, flush=True)
         if (x<640):
+            if self.verbose: print ("going to previous track", flush=True)
             self.prev_track()
         elif (x>=640 and x<1280):
             if (self.paused):
+                if self.verbose: print ("turning off pause", flush=True)
                 self.pause_off()
             else:
+                if self.verbose: print ("turning on pause", flush=True)
                 self.pause_on()
         elif (x>=1280):
+            if self.verbose: print ("going to next track", flush=True)
             self.next_track()
 
     def pause_on(self):
@@ -140,6 +144,9 @@ class MainWindow():
             self.track_number = len(self.tracks)-1
             
         self.current_track = self.tracks[self.track_number]
+        
+        if self.verbose:
+            print("playing track "+str(self.track_number)+": "+self.current_track['location'], flush=True)
         
         if (self.current_track["type"] == "image"):
             self.update_image()
@@ -203,7 +210,15 @@ class MainWindow():
         
         if (self.current_track['vlc-subtitles']):
             i_opts += ['--sub-file',self.complete_path(self.current_track['vlc-subtitles'])]
+        
+        # hack for older AVI files
+        if (self.current_track['location'].endswith(".avi") or self.current_track['location'].endswith(".AVI")):
+            i_opts += ["--codec","FFmpeg"]
             
+        if self.verbose:
+            print ("playing video "+self.current_track['location'], flush=True)
+            print ("with options "+i_opts, flush=True)
+        
         self.vlc_instance = vlc.Instance(i_opts)
         self.media = self.vlc_instance.media_new(self.complete_path(self.current_track['location']))
         self.player = vlc.MediaPlayer(self.vlc_instance,'',(''))
