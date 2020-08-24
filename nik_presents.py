@@ -47,6 +47,7 @@ class MainWindow():
         self.pause_text=None
         self.current_track=None
         self.running = True
+        self.rect=None
         self.pir = MotionSensor(17)
         self.last_motion_time = time.time()
         self.MOTION_LIMIT = 120
@@ -57,12 +58,14 @@ class MainWindow():
         
     def check_limit(self):
         if (self.running and (time.time() > (self.last_motion_time + self.MOTION_LIMIT))):
+            print("timeout reached, turning off", flush=True)
             self.running = False
             self.pause_on()
             self.turn_off_monitor()
         self.main.after(100,self.check_limit)
         
     def do_motion(self):
+        print("detected motion", flush=True)
         self.last_motion_time = time.time()
         if (not self.running):
             self.running = True
@@ -160,6 +163,8 @@ class MainWindow():
             
         self.current_track = self.tracks[self.track_number]
         
+        print("playing track "+str(self.track_number)+": "+self.current_track['location'], flush=True)
+        
         if (self.current_track["type"] == "image"):
             self.update_image()
         elif (self.current_track["type"] == "video"):
@@ -182,6 +187,8 @@ class MainWindow():
             self.canvas.delete(self.annot)
         if (self.img):
             self.canvas.itemconfig(self.image_on_canvas, image='')
+        if (self.rect):
+            self.canvas.delete(self.rect)
             
         #make the Tkinter window appear above VLC's
         #black background x window so that clicks work.
@@ -210,6 +217,8 @@ class MainWindow():
             self.canvas.delete(self.annot)
         if (self.img):
             self.canvas.itemconfig(self.image_on_canvas, image='')
+        if (self.rect):
+            self.canvas.delete(self.rect)
             
         self.img = ImageTk.PhotoImage(Image.open(self.complete_path(self.current_track["location"])))
         
@@ -219,21 +228,29 @@ class MainWindow():
         final_text=''
         img_width = self.img.width()
         if (img_width < 1800):
-            text_width = int((1920 - img_width) / 40)
+            text_width = int((1920 - img_width) / 27)
             trip_wrapped_text = textwrap.fill(self.current_track["trip-text"],
                                               width=text_width, break_long_words=False)
             annot_wrapped_text = textwrap.fill(self.current_track["annot-text"],
                                                width=text_width, break_long_words=False)
             final_text = trip_wrapped_text+"\n\n"+annot_wrapped_text
+            self.annot = self.canvas.create_text(1,10,text=final_text,anchor=NW,fill="white",
+                                                 font=("Helvetica",20,"bold"))
         else:
             text_width = 140
-            final_text = textwrap.fill(self.current_track["trip-text"]+" - "+
-                                       self.current_track["annot-text"], width=text_width,
-                                       break_long_words=False)
+            final_text = self.current_track["trip-text"]
+            if (self.current_track["annot-text"] != ''):
+                final_text += " - " + self.current_track["annot-text"]
+            final_text = textwrap.fill(final_text, width=text_width, break_long_words=False)
+            self.annot = self.canvas.create_text(1,1,text=final_text,anchor=NW,fill="white",
+                                                 font=("Helvetica",20,"bold"))
+            bbox = self.canvas.bbox(self.annot)
+            self.rect = self.canvas.create_rectangle(bbox, outline="black", fill="black")
+            self.canvas.tag_raise(self.annot,self.rect)
+
         
         self.canvas.itemconfig(self.image_on_canvas, image = self.img)
-        self.annot = self.canvas.create_text(1,40,text=final_text,anchor=NW,fill="white",
-                                             font="-*-lucidatypewriter-medium-r-*-*-*-240-*-*-*-*-*-*")
+        
         
         self.image_timer = self.main.after(8000, self.next_track)
         
