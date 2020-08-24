@@ -217,7 +217,7 @@ class MainWindow():
             
         if self.verbose:
             print ("playing video "+self.current_track['location'], flush=True)
-            print ("with options "+i_opts, flush=True)
+            print ("with options "+str(i_opts), flush=True)
         
         self.vlc_instance = vlc.Instance(i_opts)
         self.media = self.vlc_instance.media_new(self.complete_path(self.current_track['location']))
