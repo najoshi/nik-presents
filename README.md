@@ -1,1 +1,1 @@
-## A simple digital media frame which is also an homage to PiPresents
+## A simple digital media frame whose name is an homage to PiPresents

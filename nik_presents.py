@@ -35,7 +35,7 @@ class MainWindow():
         self.canvas = Canvas(main, width = 1920, height = 1080, bg = "black", highlightthickness=0)
         self.canvas.pack()
         self.track_number = -1
-        self.image_on_canvas = self.canvas.create_image(960, 540, anchor = CENTER)
+        self.image_on_canvas = self.canvas.create_image(960, 540, anchor = CENTER, image='')
         self.canvas.bind('<Button-1>',self.onClick)
 
         self.verbose = verbose
