@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
 from tkinter import *
-import glob
 from PIL import ImageTk,Image
 import json
 import sys
