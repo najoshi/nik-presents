@@ -224,8 +224,6 @@ class MainWindow():
         self.img = ImageTk.PhotoImage(Image.open(self.complete_path(self.current_track["location"])))
         
         #figure out width for text
-        #text_font = tkfont.Font(family="Helvetica", size=20, weight="bold")
-        #text_pixels = text_font.measure(self.current_track["trip-text"])
         final_text=''
         img_width = self.img.width()
         if (img_width < 1800):
@@ -266,8 +264,8 @@ class MainWindow():
 parser = argparse.ArgumentParser()
 parser.add_argument("--jsonfile", help="JSON file with tracks.", required=True)
 parser.add_argument("--mediadir", help="Root directory for media.", required=True)
-parser.add_argument("--timeout", help="Number of seconds for PIR timeout. (Default 120).", default=120)
-parser.add_argument("--duration", help="Number of seconds images are show (Default 8).", default=8)
+parser.add_argument("--timeout", help="Number of seconds for PIR timeout (Default 120).", default=120)
+parser.add_argument("--duration", help="Number of seconds images are shown (Default 8).", default=8)
 args = parser.parse_args()
 
 if (not os.path.exists(args.jsonfile)):
