@@ -100,7 +100,7 @@ class MainWindow():
         if (self.current_track["type"] == "image"):
             self.main.after_cancel(self.image_timer)
             self.pause_text = self.canvas.create_text(1,1000,text="Paused...",anchor=NW,
-                                                      fill="white",font="Helvetica 20 bold")
+                                                      fill="white",font=("Helvetica",20,"bold"))
             
         elif (self.current_track["type"] == "video"):
             self.player.set_pause(True)
