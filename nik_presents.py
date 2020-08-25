@@ -163,6 +163,7 @@ class MainWindow():
             
         if (self.current_track and self.current_track["type"] == "video"):
             self.player.stop()
+            self.release_objects()
             
         self.track_number += 1
         if self.track_number == len(self.tracks):
@@ -178,11 +179,19 @@ class MainWindow():
             self.update_image()
         elif (self.current_track["type"] == "video"):
             self.play_video()
-            
+
+    def release_objects(self):
+        if self.verbose: print("about to release vlc objects",flush=True)
+        self.vlc_instance.release()
+        self.media.release()
+        self.player.release()
+        if self.verbose: print("release done",flush=True)
+
     def check_video_loop(self):
         if self.player.get_state() == vlc.State.Ended:
             self.player.stop()
             self.main.after_cancel(self.video_timer)
+            self.release_objects()
             self.next_track()
         else:
             self.video_timer = self.main.after(100,self.check_video_loop)
@@ -219,11 +228,17 @@ class MainWindow():
             print ("playing video "+self.current_track['location'], flush=True)
             print ("with options "+str(i_opts), flush=True)
         
+        if self.verbose: print("creating vlc instance", flush=True)
         self.vlc_instance = vlc.Instance(i_opts)
+        if self.verbose: print("creating media", flush=True)
         self.media = self.vlc_instance.media_new(self.complete_path(self.current_track['location']))
+        if self.verbose: print("creating player", flush=True)
         self.player = vlc.MediaPlayer(self.vlc_instance,'',(''))
+        if self.verbose: print("setting media", flush=True)
         self.player.set_media(self.media)
+        if self.verbose: print("setting full screen", flush=True)
         self.player.set_fullscreen(True)
+        if self.verbose: print("playing video", flush=True)
         self.player.play()
         
         self.check_video_loop()
