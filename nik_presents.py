@@ -163,7 +163,7 @@ class MainWindow():
             
         if (self.current_track and self.current_track["type"] == "video"):
             self.player.stop()
-            self.release_objects()
+            #self.release_objects()
             
         self.track_number += 1
         if self.track_number == len(self.tracks):
@@ -189,9 +189,10 @@ class MainWindow():
 
     def check_video_loop(self):
         if self.player.get_state() == vlc.State.Ended:
+            if self.verbose: print("Video ended state seen")
             self.player.stop()
             self.main.after_cancel(self.video_timer)
-            self.release_objects()
+            #self.release_objects()
             self.next_track()
         else:
             self.video_timer = self.main.after(100,self.check_video_loop)
