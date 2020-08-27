@@ -49,9 +49,10 @@ class OMXDriver(object):
 
     _LAUNCH_CMD = '/usr/bin/omxplayer -s '  #needs changing if user has installed his own version of omxplayer elsewhere
 
-    def __init__(self):
+    def __init__(self, verbose):
         self.paused=False
         self._process=None
+        self.verbose = verbose
 
     def control(self,char):
         self._process.send(char)
@@ -120,12 +121,12 @@ class OMXDriver(object):
         self.terminate_reason=''
         track= "'"+ track.replace("'","'\\''") + "'"
         cmd = OMXDriver._LAUNCH_CMD + options +" " + track
-        print("Send command to omxplayer: "+ cmd)
+        if self.verbose: print("Send command to omxplayer: "+ cmd, flush=True)
         self._process = pexpect.spawn(cmd)
 
         # uncomment to monitor output to and input from omxplayer.bin (read pexpect manual)
         #fout= file('omxlogfile.txt','w')  #uncomment and change sys.stdout to fout to log to a file
-        self._process.logfile = sys.stdout.buffer  # send just commands to stdout
+        if self.verbose: self._process.logfile = sys.stdout.buffer  # send just commands to stdout
         #self._process.logfile=fout  # send all communications to log file
 
         if pause_before_play:

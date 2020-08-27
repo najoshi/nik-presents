@@ -55,16 +55,16 @@ class MainWindow():
         self.last_motion_time = time.time()
         
         self.pir.when_motion = self.do_motion
-        self.main.after(1,self.check_limit)
+        self.main.after(1,self.check_timeout)
         self.next_track()
         
-    def check_limit(self):
+    def check_timeout(self):
         if (self.running and (time.time() > (self.last_motion_time + self.timeout))):
             if self.verbose: print("timeout reached, turning off", flush=True)
             self.running = False
             self.pause_on()
             self.turn_off_monitor()
-        self.main.after(100,self.check_limit)
+        self.main.after(100,self.check_timeout)
         
     def do_motion(self):
         if self.verbose: print("detected motion", flush=True)
@@ -197,11 +197,17 @@ class MainWindow():
             
         if self.verbose:
             print ("playing video "+self.current_track['location'], flush=True)
+            
+        subop=""
+        if (self.current_track['omx-subtitles'] != ''):
+            subop = "--subtitles \""+self.complete_path(self.current_track['omx-subtitles'])+"\" "
+            subop += "--lines "+self.current_track['omx-subtitles-numlines']+" --font-size 40 "
         
-        self.omx = OMXDriver()
-        self.omx.play(self.complete_path(self.current_track['location']),
-                      "--subtitles \""+self.complete_path(self.current_track['omx-subtitles'])+"\" "+
-                      "--lines "+self.current_track['omx-subtitles-numlines'])
+        # kill off any zombie omxplayers
+        subprocess.call("killall omxplayer omxplayer.bin", shell=True)
+        
+        self.omx = OMXDriver(self.verbose)
+        self.omx.play(self.complete_path(self.current_track['location']), subop)
         self.check_video_loop()
         
         
