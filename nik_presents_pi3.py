@@ -239,7 +239,7 @@ class MainWindow():
             if (self.current_track["annot-text"] != ''):
                 final_text += " - " + self.current_track["annot-text"]
             final_text = textwrap.fill(final_text, width=text_width, break_long_words=False)
-            self.annot = self.canvas.create_text(1,1,text=final_text,anchor=NW,fill="white",
+            self.annot = self.canvas.create_text(1,10,text=final_text,anchor=NW,fill="white",
                                                  font=("Helvetica",20,"bold"))
             bbox = self.canvas.bbox(self.annot)
             self.rect = self.canvas.create_rectangle(bbox, outline="black", fill="black")
