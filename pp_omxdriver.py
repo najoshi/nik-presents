@@ -48,7 +48,7 @@ class OMXDriver(object):
     _STATUS_REXP = "M:\s*(\w*)\s*V:"
     _DONE_REXP = "have a nice day.*"
 
-    _LAUNCH_CMD = '/usr/bin/omxplayer -s --layer 2 '  #needs changing if user has installed his own version of omxplayer elsewhere
+    _LAUNCH_CMD = '/usr/bin/omxplayer -s --layer 2 --no-osd '
 
     def __init__(self, verbose):
         self.paused=False
