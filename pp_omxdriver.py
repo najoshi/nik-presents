@@ -3,6 +3,7 @@ import pexpect
 import re
 import sys
 import signal
+import subprocess
 
 from threading import Thread
 from time import sleep
@@ -47,7 +48,7 @@ class OMXDriver(object):
     _STATUS_REXP = "M:\s*(\w*)\s*V:"
     _DONE_REXP = "have a nice day.*"
 
-    _LAUNCH_CMD = '/usr/bin/omxplayer -s '  #needs changing if user has installed his own version of omxplayer elsewhere
+    _LAUNCH_CMD = '/usr/bin/omxplayer -s --layer 2 '  #needs changing if user has installed his own version of omxplayer elsewhere
 
     def __init__(self, verbose):
         self.paused=False
@@ -60,11 +61,13 @@ class OMXDriver(object):
     def pause_on(self):
         if (self.paused): return
         self.paused = True
+        subprocess.call("/home/pi/raspidmx/pngview/pngview -b 0 -l 3 -x 10 -y 1000 /home/pi/paused.png &",shell=True)
         self._process.send('p')
 
     def pause_off(self):
         if (not self.paused): return
         self.paused = False
+        subprocess.call("killall -9 pngview", shell=True)
         self._process.send('p')
         
     def pause(self):
