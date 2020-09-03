@@ -48,12 +48,13 @@ class OMXDriver(object):
     _STATUS_REXP = "M:\s*(\w*)\s*V:"
     _DONE_REXP = "have a nice day.*"
 
-    _LAUNCH_CMD = '/usr/bin/omxplayer -s --layer 2 --no-osd '
+    _LAUNCH_CMD = '/usr/bin/omxplayer -s --layer 2 --no-osd --vol -6000 '
 
     def __init__(self, verbose):
         self.paused=False
         self._process=None
         self.verbose = verbose
+        self.muted = True
 
     def control(self,char):
         self._process.send(char)
@@ -69,6 +70,14 @@ class OMXDriver(object):
         self.paused = False
         subprocess.call("killall -9 pngview", shell=True)
         self._process.send('p')
+        
+    def mute(self):
+        self.muted = True
+        subprocess.call("dbus-send --session --reply-timeout=500 --dest=org.mpris.MediaPlayer2.omxplayer /org/mpris/MediaPlayer2 org.freedesktop.DBus.Properties.Set string:\"org.mpris.MediaPlayer2.Player\" string:\"Volume\" double:0.0", shell=True)
+
+    def unmute(self):
+        self.muted = False
+        subprocess.call("dbus-send --session --reply-timeout=500 --dest=org.mpris.MediaPlayer2.omxplayer /org/mpris/MediaPlayer2 org.freedesktop.DBus.Properties.Set string:\"org.mpris.MediaPlayer2.Player\" string:\"Volume\" double:1.0", shell=True)
         
     def pause(self):
         self._process.send('p')       

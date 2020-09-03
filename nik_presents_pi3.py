@@ -82,6 +82,7 @@ class MainWindow():
 
     def onClick(self,event):
         x=event.x
+        y=event.y
         if self.verbose: print ("screen click, "+self.current_track["type"]+" track, X value: "+str(x), flush=True)
         if (x<640):
             if self.verbose: print ("going to previous track", flush=True)
@@ -94,8 +95,16 @@ class MainWindow():
                 if self.verbose: print ("turning on pause", flush=True)
                 self.pause_on()
         elif (x>=1280):
-            if self.verbose: print ("going to next track", flush=True)
-            self.next_track()
+            if (self.current_track["type"] == "video" and x>1820 and y<100):
+                if (self.omx.muted):
+                    if self.verbose: print("Unmuting...")
+                    self.omx.unmute()
+                else:
+                    if self.verbose: print("Muting...")
+                    self.omx.mute()
+            else:
+                if self.verbose: print ("going to next track", flush=True)
+                self.next_track()
 
     def pause_on(self):
         if (self.paused):
