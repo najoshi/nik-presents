@@ -43,8 +43,6 @@ Signals
 
 class OMXDriver(object):
 
-    #_STATUS_REXP = re.compile(r"M:\s*(\w*)\s*V:")
-    #_DONE_REXP = re.compile(r"have a nice day.*")
     _STATUS_REXP = "M:\s*(\w*)\s*V:"
     _DONE_REXP = "have a nice day.*"
 
