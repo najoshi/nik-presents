@@ -9,34 +9,18 @@ from threading import Thread
 from time import sleep
 
 """
- pyomxplayer from https://github.com/jbaiter/pyomxplayer
- extensively modified by KenT
-
- omxdriver hides the detail of using the omxplayer command  from videoplayer
- This is meant to be used with videoplayer.py
- Its easy to end up with many copies of omxplayer.bin running if this class is not used with care. use pp_videoplayer.py for a safer interface.
- I found overlapping prepare and show did nor completely reduce the gap between tracks. Sometimes, in a test of this, one of my videos ran very fast when it was the second video 
+pp_omxdriver from https://github.com/KenT2/pipresents-next
+and modified for this project
 
  External commands
  ----------------------------
  __init__ just creates the instance and initialises variables (e.g. omx=OMXPlayer())
  play -  plays a track
- pause  - toggles pause
- control  - sends controls to omxplayer.bin  while track is playing (use stop and pause instead of q and p)
- stop - stops a video that is playing.
+ pause_on  - pauses the video
+ pause_off - unpauses the video
  terminate - Stops a video playing. Used when aborting an application.
- kill - kill of omxplayer when it hasn't terminated at the end of a track.
- 
- Advanced:
- prepare  - processes the track up to where it is ready to display, at this time it pauses.
- show  - plays the video from where 'prepare' left off by resuming from the pause.
+ kill - kill off omxplayer when it hasn't terminated at the end of a track.
 
-
-Signals
-----------
- The following signals are produced while a track is playing
-         self.start_play_signal = True when a track is ready to be shown
-         self.end_play_signal= True when a track has finished due to stop or because it has come to an end
  Also is_running() tests whether the sub-process running omxplayer is present.
 
 """
@@ -46,6 +30,7 @@ class OMXDriver(object):
     _STATUS_REXP = "M:\s*(\w*)\s*V:"
     _DONE_REXP = "have a nice day.*"
 
+    # launch video with volume at lowest level (i.e. muted)
     _LAUNCH_CMD = '/usr/bin/omxplayer -s --layer 2 --no-osd --vol -6000 '
 
     def __init__(self, verbose):
@@ -58,23 +43,32 @@ class OMXDriver(object):
         self._process.send(char)
         
     def pause_on(self):
+        # if already paused, then don't need to do anything
         if (self.paused): return
         self.paused = True
-        subprocess.call("/home/pi/raspidmx/pngview/pngview -b 0 -l 3 -x 10 -y 1000 /home/pi/paused.png &",shell=True)
+        # uses pngview to put the text "Paused..." as a png in the lower left corner of the screen
+        # pngview should be in a standard path directory, e.g. /usr/bin
+        subprocess.call("pngview -b 0 -l 3 -x 10 -y 1000 paused.png &",shell=True)
         self._process.send('p')
 
     def pause_off(self):
+        # if already unpaused, then don't need to do anything
         if (not self.paused): return
         self.paused = False
+        # kill pngview to remove "Paused..." text
         subprocess.call("killall -9 pngview", shell=True)
         self._process.send('p')
         
     def mute(self):
         self.muted = True
+        # This crazy command sends a message to omxplayer using
+        # dbus to set the volume to it's lowest value
         subprocess.call("export DBUS_SESSION_BUS_ADDRESS=$(cat /tmp/omxplayerdbus.${USER:-root}); dbus-send --print-reply --session --reply-timeout=500 --dest=org.mpris.MediaPlayer2.omxplayer /org/mpris/MediaPlayer2 org.freedesktop.DBus.Properties.Set string:\"org.mpris.MediaPlayer2.Player\" string:\"Volume\" double:0.0", shell=True)
 
     def unmute(self):
         self.muted = False
+        # This crazy command sends a message to omxplayer using
+        # dbus to set the volume to it's highest value (i.e. the max volume set for the monitor by the user) 
         subprocess.call("export DBUS_SESSION_BUS_ADDRESS=$(cat /tmp/omxplayerdbus.${USER:-root}); dbus-send --print-reply --session --reply-timeout=500 --dest=org.mpris.MediaPlayer2.omxplayer /org/mpris/MediaPlayer2 org.freedesktop.DBus.Properties.Set string:\"org.mpris.MediaPlayer2.Player\" string:\"Volume\" double:1.0", shell=True)
         
     def pause(self):
@@ -187,6 +181,7 @@ class OMXDriver(object):
                 #  - 3 matches _STATUS_REXP so get time stamp
                 self.video_position = float(self._process.match.group(1))
                 self.audio_position = 0.0             
-            #sleep is Ok here as it is a seperate thread. self.widget.after has funny effects as its not in the maion thread.
+            #sleep is Ok here as it is a seperate thread. self.widget.after has
+            #funny effects as its not in the main thread.
             sleep(0.05)   # stats output rate seem to be about 170mS.
 

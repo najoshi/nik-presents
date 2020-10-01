@@ -12,7 +12,7 @@ import subprocess
 import random
 import argparse
 import os
-from pp_omxdriver import OMXDriver
+from pp_vlcdriver import VLCDriver
 
 
 class MainWindow():
@@ -20,6 +20,7 @@ class MainWindow():
     def __init__(self, main, jsonfile, media_home, timeout, duration, verbose):
 
         self.media_home = media_home
+        self.media_profile = ""
         self.main=main
         self.main.attributes("-fullscreen", True)
         self.main.bind("q", self.quit)
@@ -28,18 +29,16 @@ class MainWindow():
             data = jfile.read()
 
         self.tracks = json.loads(data)["tracks"]
-        #shuffle the tracks so that they are random
-        random.shuffle(self.tracks)
+        #random.shuffle(self.tracks)
 
         # canvas for image
         self.canvas = Canvas(main, width = 1920, height = 1080, bg = "black", highlightthickness=0)
         self.canvas.pack()
         self.track_number = -1
-        # create blank image to begin with
         self.image_on_canvas = self.canvas.create_image(960, 540, anchor = CENTER, image='')
         self.canvas.bind('<Button-1>',self.onClick)
 
-        self.omx=None
+        self.vlc=None
         self.verbose = verbose
         self.image_timer=None
         self.video_timer=None
@@ -60,8 +59,6 @@ class MainWindow():
         self.next_track()
         
     def check_timeout(self):
-        # if the current time is greater than the last time there was motion
-        # plus the timeout, then turn off the monitor and pause
         if (self.running and (time.time() > (self.last_motion_time + self.timeout))):
             if self.verbose: print("timeout reached, turning off", flush=True)
             self.running = False
@@ -85,14 +82,11 @@ class MainWindow():
 
     def onClick(self,event):
         x=event.x
-        y=event.y
         if self.verbose: print ("screen click, "+self.current_track["type"]+" track, X value: "+str(x), flush=True)
         if (x<640):
-            # touching first third of screen goes to previous track
             if self.verbose: print ("going to previous track", flush=True)
             self.prev_track()
         elif (x>=640 and x<1280):
-            # touching middle third of screen pauses track
             if (self.paused):
                 if self.verbose: print ("turning off pause", flush=True)
                 self.pause_off()
@@ -100,25 +94,12 @@ class MainWindow():
                 if self.verbose: print ("turning on pause", flush=True)
                 self.pause_on()
         elif (x>=1280):
-            # touching last third of screen goes to next track
-            # unless track is video and touch is in upper right corner
-            # then toggles mute
-            if (self.current_track["type"] == "video" and x>1820 and y<100):
-                if (self.omx.muted):
-                    if self.verbose: print("Unmuting...")
-                    self.omx.unmute()
-                else:
-                    if self.verbose: print("Muting...")
-                    self.omx.mute()
-            else:
-                if self.verbose: print ("going to next track", flush=True)
-                self.next_track()
+            if self.verbose: print ("going to next track", flush=True)
+            self.next_track()
 
     def pause_on(self):
-        # if already paused, then don't need to do anything
         if (self.paused):
             return
-        
         self.paused = True
         
         if (self.current_track["type"] == "image"):
@@ -127,13 +108,11 @@ class MainWindow():
                                                       fill="white",font=("Helvetica",20,"bold"))
             
         elif (self.current_track["type"] == "video"):
-            self.omx.pause_on()
+            self.vlc.pause_on()
             
     def pause_off(self):
-        # if already unpaused, then don't need to do anything
         if (not self.paused):
             return
-        
         self.paused = False
         
         if (self.current_track["type"] == "image"):
@@ -141,7 +120,7 @@ class MainWindow():
             self.image_timer = self.main.after(self.duration, self.next_track)
             
         elif (self.current_track["type"] == "video"):
-            self.omx.pause_off()
+            self.vlc.pause_off()
 
 
     def prev_track(self):
@@ -153,7 +132,7 @@ class MainWindow():
             self.main.after_cancel(self.video_timer)
 
         if (self.current_track["type"] == "video"):
-            self.omx.terminate("prev track pressed")
+            self.vlc.terminate("prev track pressed")
             
         self.track_number -= 1
         if self.track_number == -1:
@@ -178,7 +157,7 @@ class MainWindow():
             self.main.after_cancel(self.video_timer)
             
         if (self.current_track and self.current_track["type"] == "video"):
-            self.omx.terminate("next track pressed")
+            self.vlc.terminate("next track pressed")
             
         self.track_number += 1
         if self.track_number == len(self.tracks):
@@ -196,9 +175,9 @@ class MainWindow():
             self.play_video()
 
     def check_video_loop(self):
-        if (not self.omx.is_running()):
+        if (not self.vlc.is_running()):
             if self.verbose: print("Video ended state seen")
-            self.omx.kill()
+            self.vlc.kill()
             self.main.after_cancel(self.video_timer)
             self.next_track()
         else:
@@ -220,15 +199,14 @@ class MainWindow():
             print ("playing video "+self.current_track['location'], flush=True)
             
         subop=""
-        if (self.current_track['omx-subtitles'] != ''):
-            subop = "--subtitles \""+self.complete_path(self.current_track['omx-subtitles'])+"\" "
-            subop += "--lines "+self.current_track['omx-subtitles-numlines']+" --font-size 40 "
+        if (self.current_track['vlc-subtitles'] != ''):
+            subop = "--sub-file \""+self.complete_path(self.current_track['vlc-subtitles'])+"\" "
         
-        # kill off any zombie omxplayers
-        subprocess.call("killall omxplayer omxplayer.bin", shell=True)
+        # kill off any zombie VLC players
+        subprocess.call("killall vlc", shell=True)
         
-        self.omx = OMXDriver(self.verbose)
-        self.omx.play(self.complete_path(self.current_track['location']), subop)
+        self.vlc = VLCDriver(self.verbose)
+        self.vlc.play(self.complete_path(self.current_track['location']), subop)
         self.check_video_loop()
         
         
@@ -242,9 +220,7 @@ class MainWindow():
             
         self.img = ImageTk.PhotoImage(Image.open(self.complete_path(self.current_track["location"])))
         
-        # figure out wrap width for text and create wrapped text
-        # if image width is <1800px then use image width to get wrap width
-        # if image width is >=1800px then wirte text across top in a black box
+        #figure out width for text
         final_text=''
         img_width = self.img.width()
         if (img_width < 1800):
@@ -262,7 +238,7 @@ class MainWindow():
             if (self.current_track["annot-text"] != ''):
                 final_text += " - " + self.current_track["annot-text"]
             final_text = textwrap.fill(final_text, width=text_width, break_long_words=False)
-            self.annot = self.canvas.create_text(1,10,text=final_text,anchor=NW,fill="white",
+            self.annot = self.canvas.create_text(1,1,text=final_text,anchor=NW,fill="white",
                                                  font=("Helvetica",20,"bold"))
             bbox = self.canvas.bbox(self.annot)
             self.rect = self.canvas.create_rectangle(bbox, outline="black", fill="black")
