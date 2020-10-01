@@ -38,6 +38,7 @@ class OMXDriver(object):
         self._process=None
         self.verbose = verbose
         self.muted = True
+        self.dir_path = os.path.dirname(os.path.realpath(__file__))
 
     def control(self,char):
         self._process.send(char)
@@ -48,7 +49,7 @@ class OMXDriver(object):
         self.paused = True
         # uses pngview to put the text "Paused..." as a png in the lower left corner of the screen
         # pngview should be in a standard path directory, e.g. /usr/bin
-        subprocess.call("pngview -b 0 -l 3 -x 10 -y 1000 paused.png &",shell=True)
+        subprocess.call("pngview -b 0 -l 3 -x 10 -y 1000 "+self.dir_path+"/paused.png &",shell=True)
         self._process.send('p')
 
     def pause_off(self):
