@@ -20,7 +20,7 @@ Currently, this software only works on the Pi3 running Raspbian. Below are instr
 
 ## Instructions
 
-First you will need to get the following:
+1. First you will need to get the following:
 
 * [Raspberry Pi 3 Model B+](https://www.raspberrypi.org/products/raspberry-pi-3-model-b-plus/)
 * [Pi 3 B+ tall case](https://www.pishop.us/product/highpi-raspberry-pi-b23-case-black/)
@@ -35,4 +35,4 @@ First you will need to get the following:
 * [Velcro strips](https://www.amazon.com/gp/product/B00006IC2T)
 
 
-1. 
+2. Put the Pi into the case and then insert the SD card. Attach velcro strips to the 
