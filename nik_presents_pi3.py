@@ -101,7 +101,7 @@ class MainWindow():
                 self.pause_on()
         elif (x>=1280):
             # touching last third of screen goes to next track
-            # unless track is video and touch is in upper right corner
+            # unless track is video and touch is in upper right corner,
             # then toggles mute
             if (self.current_track["type"] == "video" and x>1820 and y<100):
                 if (self.omx.muted):
@@ -154,7 +154,9 @@ class MainWindow():
 
         if (self.current_track["type"] == "video"):
             self.omx.terminate("prev track pressed")
-            
+        
+        # decrement the track number by 1
+        # if at beginning of tracks, then set track number to last track
         self.track_number -= 1
         if self.track_number == -1:
             self.track_number = len(self.tracks)-1
@@ -179,7 +181,10 @@ class MainWindow():
             
         if (self.current_track and self.current_track["type"] == "video"):
             self.omx.terminate("next track pressed")
-            
+        
+        # increment the track number by 1
+        # if at end of tracks, then shuffle tracks and
+        # set track number to first track
         self.track_number += 1
         if self.track_number == len(self.tracks):
             random.shuffle(self.tracks)
@@ -218,7 +223,8 @@ class MainWindow():
             
         if self.verbose:
             print ("playing video "+self.current_track['location'], flush=True)
-            
+        
+        # set subtitle options
         subop=""
         if (self.current_track['omx-subtitles'] != ''):
             subop = "--subtitles \""+self.complete_path(self.current_track['omx-subtitles'])+"\" "
