@@ -35,4 +35,6 @@ Currently, this software only works on the Pi3 running Raspbian. Below are instr
 * [Velcro strips](https://www.amazon.com/gp/product/B00006IC2T)
 
 
-2. Put the Pi into the case and then insert the SD card. Attach velcro strips to the 
+2. Put the Pi into the case and then insert the SD card (don't insert the SD card first!). Add velcro strips to the bottom of the case and matching strips on the back of the monitor. Do the same for the hard drive. They should be positioned like this:
+
+![MonitorBack1](20200708_032649.small.jpg)
