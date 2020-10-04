@@ -37,31 +37,31 @@ Currently, this software only works on the Pi3 running Raspbian. Below are instr
 * Thin, semi-flexible, rubber-coated wire
 
 
-2. Put the Pi into the case and then insert the SD card (don't insert the SD card first!). Add velcro strips to the bottom of the case and matching strips on the back of the monitor. Do the same for the hard drive. They should be positioned like this:
+**2\.** Put the Pi into the case and then insert the SD card (don't insert the SD card first!). Add velcro strips to the bottom of the case and matching strips on the back of the monitor. Do the same for the hard drive. They should be positioned like this:
 
 ![MonitorBack1](20200708_032649.small.jpg)
 
 I have also epoxied cord clips onto the back to hold the bundle of cords that will be there.
 
 
-3. Before you put the cover on the Pi case, you need to attach the jumper cables for the PIR. I used black for ground (GND), white for signal (OUT), and red for power (+5V). I attached the power to pin 2, the ground to pin 6, and the signal to pin 11 (GPIO17), like so:
+**3\.** Before you put the cover on the Pi case, you need to attach the jumper cables for the PIR. I used black for ground (GND), white for signal (OUT), and red for power (+5V). I attached the power to pin 2, the ground to pin 6, and the signal to pin 11 (GPIO17), like so:
 
 ![jumpercables](20201003_043309.small.jpg)
 
 Yes, I know this is a picture of a Pi4, but the pinout is the same.
 
 
-4. Put the cover on the case. Attach the jumper cables to the PIR. Right below the pins on the PIR are the labels for GND, OUT, and +5V. Also, you can set the orange dials on the PIR... set the time to minimum, and set the sensitivity to somewhere in the middle. You will have to play with that dial to get the right position for the sensitivity you want after you place the frame where it will go. Now, we will glue the PIR motion sensor to the monitor. I used some thin, rubber-coated wire to mount the sensor so that it peeks above the top of the monitor and used a hot glue gun to glue the wires to the back of the monitor:
+**4\.** Put the cover on the case. Attach the jumper cables to the PIR. Right below the pins on the PIR are the labels for GND, OUT, and +5V. Also, you can set the orange dials on the PIR... set the time to minimum, and set the sensitivity to somewhere in the middle. You will have to play with that dial to get the right position for the sensitivity you want after you place the frame where it will go. Now, we will glue the PIR motion sensor to the monitor. I used some thin, rubber-coated wire to mount the sensor so that it peeks above the top of the monitor and used a hot glue gun to glue the wires to the back of the monitor:
 
 ![pir](20201003_232640.small.jpg)
 
 
-5. Now attach all the other cables and use the cord clips to hold the cords. Attach the HDMI cable to the Pi and monitor. Attach the power supply to the Pi. Attach the USB cable from the monitor to the Pi (for the touchscreen mouse emulation). Attach the external hard drive to the Pi using the 3ft cable. After that is all done, it should look like this (minus the VESA mount):
+**5\.** Now attach all the other cables and use the cord clips to hold the cords. Attach the HDMI cable to the Pi and monitor. Attach the power supply to the Pi. Attach the USB cable from the monitor to the Pi (for the touchscreen mouse emulation). Attach the external hard drive to the Pi using the 3ft cable. After that is all done, it should look like this (minus the VESA mount):
 
 ![MonitorBack2](20200708_235537.small.jpg)
 
 
-6. Now we need to boot the Pi and install the software. Attach a keyboard and mouse to the Pi and boot it up. You may need to do some setup before it boots you into a desktop. You'll want a full install of Raspbian with a desktop. Once you are at the desktop, open a terminal and run the following:
+**6\.** Now we need to boot the Pi and install the software. Attach a keyboard and mouse to the Pi and boot it up. You may need to do some setup before it boots you into a desktop. You'll want a full install of Raspbian with a desktop. Once you are at the desktop, open a terminal and run the following:
 
     sudo apt-get update
     sudo apt-get install python-pexpect
@@ -72,7 +72,7 @@ Yes, I know this is a picture of a Pi4, but the pinout is the same.
     sudo pip3 install evdev
 
 
-7. Next we need to download and install pngview. pngview is part of the [raspidmx repository](https://github.com/AndrewFromMelbourne/raspidmx). After cloning the repo, you only need to make pngview. Finally, copy pngview to /usr/bin.
+**7\.** Next we need to download and install pngview. pngview is part of the [raspidmx repository](https://github.com/AndrewFromMelbourne/raspidmx). After cloning the repo, you only need to make pngview. Finally, copy pngview to /usr/bin.
 
     git clone https://github.com/AndrewFromMelbourne/raspidmx.git
     cd raspidmx/pngview
@@ -80,7 +80,7 @@ Yes, I know this is a picture of a Pi4, but the pinout is the same.
     sudo cp pngview /usr/bin
 
 
-8. Now we clone the [nik-presents repo](https://github.com/najoshi/nik-presents.git):
+**8\.** Now we clone the [nik-presents repo](https://github.com/najoshi/nik-presents.git):
 
     cd /home/pi
     git clone https://github.com/najoshi/nik-presents.git
