@@ -64,10 +64,9 @@ Yes, I know this is a picture of a Pi4, but the pinout is the same.
 **6\.** Now we need to boot the Pi and install the software. Attach a keyboard and mouse to the Pi and boot it up. You may need to do some setup before it boots you into a desktop. You'll want a full install of Raspbian with a desktop. Once you are at the desktop, open a terminal and run the following:
 
     sudo apt-get update
-    sudo apt-get install python-pexpect
-    sudo apt-get install python-imaging
-    sudo apt-get install python-imaging-tk
-    sudo apt-get install x11-xserver-utils
+    sudo apt-get upgrade
+    sudo apt-get install python3-pexpect
+    sudo apt-get install python3-pil.imagetk
     sudo apt-get install dbus
     sudo pip3 install evdev
 
@@ -80,8 +79,34 @@ Yes, I know this is a picture of a Pi4, but the pinout is the same.
     sudo cp pngview /usr/bin
 
 
-**8\.** Now we clone the [nik-presents repo](https://github.com/najoshi/nik-presents.git):
+**8\.** Now we clone the nik-presents repo:
 
     cd /home/pi
     git clone https://github.com/najoshi/nik-presents.git
-    cd nik-presents
+
+Find the directory that your external hard drive mounted to. Mine is "/media/pi/Seagate\ Expansion\ Drive", but yours may be different. Create a directory called "media" on the drive. This is where your pictures and videos will be kept. See below for instructions on how to structure the directories, convert the media so that it can be shown on the monitor, choose the media you want, and create a JSON file for the tracks. Once you have your media and JSON file, update the "nikwrapper.sh" script to reflect those. The "--mediadir" option only needs the path up to your "media" directory. I.e., my media directory is "/media/pi/Seagate\ Expansion\ Drive/media", but the directory for the "--mediadir" option is "/media/pi/Seagate\ Expansion\ Drive".
+
+
+**9\.** The final step is to make nik-presents automatically start on boot and to hide the mouse cursor. Make sure to test out nik-presents on the command-line using your media files before doing this step (See below). Open the Raspberry Pi Configuration editor and under "Display", disable screen blanking. Go to the "/home/pi/.config/lxsession/LXDE-pi/" directory. If it does not exist, create it.
+
+    cd /home/pi/.config/lxsession/LXDE-pi/
+
+In this directory, there should be a file called "autostart". Change the file so it looks like this:
+
+> @lxpanel --profile LXDE-pi
+> @pcmanfm --desktop --profile LXDE-pi
+> @xscreensaver -no-splash
+> 
+> /home/pi/nik-presents/nikwrapper.sh
+
+Finally, edit the "/etc/lightdm/lightdm.conf" file:
+
+    sudo nano /etc/lightdm/lightdm.conf
+
+There is a section (mine is under where it has [Seat:\*]) where you can specify the xserver-command. Uncomment that line and change it to this:
+
+> xserver-command=X -nocursor
+
+Now reboot your Pi. It should log into the desktop and then after about 10 seconds nik-presents should start up.
+
+
