@@ -20,7 +20,7 @@ Currently, this software only works on the Pi3 running Raspbian. Below are instr
 
 ## Instructions
 
-1. First you will need to get the following:
+**1\.** First you will need to get the following:
 
 * [Raspberry Pi 3 Model B+](https://www.raspberrypi.org/products/raspberry-pi-3-model-b-plus/)
 * [Pi 3 B+ tall case](https://www.pishop.us/product/highpi-raspberry-pi-b23-case-black/)
