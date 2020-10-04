@@ -74,28 +74,8 @@ sub process_image {
     my ($thefile, $isincurrdir, $ext) = @_;
 
     ($trip_text,$title) = $thefile =~ /^.+?\/(.+?)\/(.+\.$ext)$/i;
-	$location = $thefile;
-
+    $location = $thefile;
     $annot_text = $extra_text{$title};
-
-	#my $width = `convert "$location" -print "%w" /dev/null`;
-
-	#if ($width >= 1900) {
-		#if (exists $extra_text{$title}) {
-			#$text .= " - " . $extra_text{$title};
-		#}
-	#}
-
-	#else {
-		#if (exists $extra_text{$title}) {
-			#$text .= "\\n\\n" . $extra_text{$title};
-		#}
-
-		# $Text::Wrap::huge = "overflow";
-		# $Text::Wrap::separator="\\n";
-		# $Text::Wrap::columns = int ((1920 - $width) / 28);
-		# $text = wrap("","",$text);
-	#}
 
 my $image_json = <<"END_IMAGE_JSON";
   {
@@ -122,56 +102,41 @@ sub process_video {
         $text .= " - " . $extra_text{$title};
     }
 
-	#$Text::Wrap::separator="\\N";
-	#$Text::Wrap::columns=53;
-    #$text = wrap("","",$text);
+	$Text::Wrap::separator="\n";
+	$Text::Wrap::columns=53;
+    $text = wrap("","",$text);
 
-    $duration_string = `ffprobe -i "$location" -show_format -v quiet | grep duration`;
-    my ($sec,$msec) = $duration_string =~ /duration=(\d+?)\.(\d\d\d)/;
+	$duration_string = `ffprobe -i "$location" -show_format -v quiet | grep duration`;
+	my ($sec,$msec) = $duration_string =~ /duration=(\d+?)\.(\d\d\d)/;
 
-	#my $numlines=()=$text=~/(\n)/g;
-	#$numlines++;
+	my $numlines=()=$text=~/(\n)/g;
+	$numlines++;
 
-	$subtitles_file = $location . ".ssa";
+	$subtitles_file = $location . ".srt";
 	open ($subfile, ">$subtitles_file");
-
-print $subfile <<"END_VIDEO_OPTIONS";
-[Script Info]
-Title: <untitled>
-ScriptType: v4.00+
-Collisions: Normal
-PlayDepth: 0
-
-[v4+ Styles]
-Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Default,Arial,20,&H00FFFFFF,&H000080FF,&H00000000,&H80000000,0,0,0,0,75,75,0,0,1,1,0,2,5,5,5,0
-
-[Events]
-Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
-END_VIDEO_OPTIONS
-
 	for ($i=0; $i<=$sec; $i++) {
-        my $itxt = sprintf("%0".length($sec)."d", $i);
-		
-        if ($i<$sec) {
-			print $subfile "Dialogue: 0,0:00:$i.00,0:00:".($i+1).".00,Default,,0,0,0,,$text [${itxt}s/${sec}s]\n";
+		print $subfile "".($i+1)."\n";
+		if ($i<$sec) {
+			print $subfile "00:00:$i,000 --> 00:00:".($i+1).",000\n";
 		} elsif ($msec ne "000") {
-			print $subfile "Dialogue: 0,0:00:$i.00,0:00:$i.$msec,Default,,0,0,0,,$text [${itxt}s/${sec}s]\n";
+			print $subfile "00:00:$i,000 --> 00:00:$i,$msec\n";
 		}
+		print $subfile "$text [$i"."s/$sec"."s]\n\n";
 	}
 	close ($subfile);
 
 my $video_json = <<"END_VIDEO_JSON";
   {
    "location": "+/$location",
-   "vlc-subtitles": "+/$subtitles_file",
+   "omx-subtitles": "+/$subtitles_file",
+   "omx-subtitles-numlines": "$numlines",
    "type": "video"
   }
 END_VIDEO_JSON
 
 	if (!$firstfile) {print $outfd ",\n";}
-    else {$firstfile=0;}
-    print $outfd $video_json;
+        else {$firstfile=0;}
+        print $outfd $video_json;
 }
 
 
@@ -216,7 +181,7 @@ if ($ARGV[2] eq ".." || $ARGV[2] eq ".") {
 		#exit(1);
 	#}
 #}
-$oa = "A";
+$oa="A";
 
 if ($oa eq "A") {
 	system ("head --lines=-2 $outfile > $outfile.tmp");
@@ -229,6 +194,7 @@ else {
 
 print $outfd <<EOT;
 {
+ "issue": "1.3.5",
  "tracks": [
 EOT
 

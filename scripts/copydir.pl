@@ -2,6 +2,8 @@
 
 use Tk;
 
+$mediadir = "/home/joshi/digital_media_frame/media"
+
 sub do_copy {
 
 foreach $dir (@ARGV) {
@@ -9,7 +11,7 @@ foreach $dir (@ARGV) {
 if ($dir =~ /^(.+)\/$/) {$dir = $1;}
 ($basedir) = $dir =~ /^.+\/(.+)$/;
 
-$destdir = "/home/joshi/digital_media_frame/media/$basedir";
+$destdir = "$mediadir/$basedir";
 
 system ("mkdir \"$destdir\"");
 system ("cp --preserve \"$dir/\"*.jpg \"$dir/\"*.JPG \"$dir/\"*.jpeg \"$dir/\"*.JPEG \"$dir/\"*.png \"$dir/\"*.PNG \"$destdir\"");
