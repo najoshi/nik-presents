@@ -18,7 +18,7 @@ I couldn't find a digital media frame that did all the things I wanted, so I mad
 Currently, this software only works on the Pi3 running Raspbian. Below are instructions on how to assemble the hardware (i.e., monitor, Pi, motion sensor, external hard drive) as well as how to set up and run the software.
 
 
-## Instructions
+## Build Instructions
 
 **1\.** First you will need to get the following:
 
@@ -91,7 +91,7 @@ Find the directory that your external hard drive mounted to. Mine is "/media/pi/
 
     cd /home/pi/.config/lxsession/LXDE-pi/
 
-In this directory, there should be a file called "autostart". Change the file so it looks like this:
+In this directory, there should be a file called "autostart". If it doesn't exist, create it. Change the file so it looks like this:
 
 > @lxpanel --profile LXDE-pi
 >
@@ -112,3 +112,4 @@ There is a section (mine is under where it has [Seat:\*]) where you can specify 
 Now reboot your Pi. It should log into the desktop and then after about 10 seconds nik-presents should start up.
 
 
+## Media (Pictures & Videos) conversion and configuration instructions
