@@ -4,7 +4,6 @@ from tkinter import *
 from PIL import ImageTk,Image
 import json
 import sys
-from vlc import VideoMarqueeOption
 import textwrap
 from gpiozero import MotionSensor
 import time
