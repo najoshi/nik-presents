@@ -98,6 +98,8 @@ Find the directory that your external hard drive mounted to. Mine is "/media/pi/
       --duration DURATION  Number of seconds images are shown (Default 8).
       --verbose            Informational output to STDOUT.
 
+You can change the PIR timeout and the image duration to whatever suits you. Just add those options to the "nikwrapper.sh" file.
+
 
 **9\.** The final step is to make nik-presents automatically start on boot and to hide the mouse cursor. Make sure to test out nik-presents on the command-line using your media files before doing this step (See below). Open the Raspberry Pi Configuration editor and under "Display", disable screen blanking. Go to the "/home/pi/.config/lxsession/LXDE-pi/" directory. If it does not exist, create it.
 
@@ -124,7 +126,7 @@ There is a section (mine is under where it has [Seat:\*]) where you can specify 
 Now reboot your Pi. It should log into the desktop and then after about 10 seconds nik-presents should start up.
 
 
-**10\.** When your media frame is running, you will be able to navigate through the tracks using your touchscreen. The first third of the screen, horizontally, is the "previous" button, i.e. go to the previous track. The middle third is "pause". The last third is "next". If the track is a video, then the top right corner of the screen becomes an unmute/mute button. Videos always start muted, so you can use the top right corner to unmute if you want to hear the sound. The volume is determined by the setting on your monitor. nik-presents will pause and turn off the monitor after a stretch of non-motion (default 120 seconds, can be set by the user). When motion is detected, the monitor turns on and nik-presents unpauses.
+**10\.** nik-presents shows the tracks in shuffled order. When your media frame is running, you will be able to navigate through the tracks using your touchscreen. The first third of the screen, horizontally, is the "previous" button, i.e. go to the previous track. The middle third is "pause". The last third is "next". If the track is a video, then the top right corner of the screen becomes an unmute/mute button. Videos always start muted, so you can use the top right corner to unmute if you want to hear the sound. The volume is determined by the setting on your monitor. nik-presents will pause and turn off the monitor after a stretch of non-motion (default 120 seconds, can be set by the user). When motion is detected, the monitor turns on and nik-presents unpauses.
 
 
 ## Media (Pictures & Videos) conversion and configuration instructions
