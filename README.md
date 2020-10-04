@@ -60,6 +60,8 @@ Yes, I know this is a picture of a Pi4, but the pinout is the same.
 
 ![MonitorBack2](20200708_235537.small.jpg)
 
+You want to make sure you can remove and stick on the hard drive relatively easily. This is so that you can remove the hard drive to copy files over (from your main computer) whenever you have new pictures and videos. In my experience, copying over wireless is very slow, but maybe it will be different for you based on your setup.
+
 
 **6\.** Now we need to boot the Pi and install the software. Attach a keyboard and mouse to the Pi and boot it up. You may need to do some setup before it boots you into a desktop. You'll want a full install of Raspbian with a desktop. Once you are at the desktop, open a terminal and run the following:
 
@@ -126,7 +128,9 @@ There is a section (mine is under where it has [Seat:\*]) where you can specify 
 Now reboot your Pi. It should log into the desktop and then after about 10 seconds nik-presents should start up.
 
 
-**10\.** nik-presents shows the tracks in shuffled order. When your media frame is running, you will be able to navigate through the tracks using your touchscreen. The first third of the screen, horizontally, is the "previous" button, i.e. go to the previous track. The middle third is "pause". The last third is "next". If the track is a video, then the top right corner of the screen becomes an unmute/mute button. Videos always start muted, so you can use the top right corner to unmute if you want to hear the sound. The volume is determined by the setting on your monitor. nik-presents will pause and turn off the monitor after a stretch of non-motion (default 120 seconds, can be set by the user). When motion is detected, the monitor turns on and nik-presents unpauses.
+**10\.** nik-presents shows the tracks in shuffled order. When your media frame is running, you will be able to navigate through the tracks using your touchscreen. The first third of the screen, going from left to right, is the "previous" button, i.e. go to the previous track. The middle third is "pause". The last third is "next". If the track is a video, then the top right corner of the screen becomes an unmute/mute button. Videos always start muted, so you can touch the top right corner to unmute if you want to hear the sound and then touch it again to mute. The volume is determined by the setting on your monitor. nik-presents will pause and turn off the monitor after a stretch of no motion (default 120 seconds, can be set by the user). When motion is detected, the monitor turns on and nik-presents unpauses.
 
 
 ## Media (Pictures & Videos) conversion and configuration instructions
+
+In order to use nik-presents, you will need to resize your images to fit in the 1920x1080 screen. Videos generally do not need to be converted, however, if the frame rate for your video is non-standard (e.g. 60fps) then there might be some issues with the subtitles, which are used for annotation. In order to this more easily, I have written a series of perl scripts to help you.
