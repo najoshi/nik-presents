@@ -94,7 +94,9 @@ Find the directory that your external hard drive mounted to. Mine is "/media/pi/
 In this directory, there should be a file called "autostart". Change the file so it looks like this:
 
 > @lxpanel --profile LXDE-pi
+
 > @pcmanfm --desktop --profile LXDE-pi
+
 > @xscreensaver -no-splash
 > 
 > /home/pi/nik-presents/nikwrapper.sh
