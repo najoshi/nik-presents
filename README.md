@@ -84,14 +84,26 @@ Yes, I know this is a picture of a Pi4, but the pinout is the same.
     cd /home/pi
     git clone https://github.com/najoshi/nik-presents.git
 
-Find the directory that your external hard drive mounted to. Mine is "/media/pi/Seagate\ Expansion\ Drive", but yours may be different. Create a directory called "media" on the drive. This is where your pictures and videos will be kept. See below for instructions on how to structure the directories, convert the media so that it can be shown on the monitor, choose the media you want, and create a JSON file for the tracks. Once you have your media and JSON file, update the "nikwrapper.sh" script to reflect those. The "--mediadir" option only needs the path up to your "media" directory. I.e., my media directory is "/media/pi/Seagate\ Expansion\ Drive/media", but the directory for the "--mediadir" option is "/media/pi/Seagate\ Expansion\ Drive".
+Find the directory that your external hard drive mounted to. Mine is "/media/pi/Seagate\ Expansion\ Drive", but yours may be different. Create a directory called "media" on the drive. This is where your pictures and videos will be kept. See below for instructions on how to structure the directories, convert the media so that it can be shown on the monitor, choose the media you want, and create a JSON file for the tracks. Once you have your media and JSON file, update the "nikwrapper.sh" script to reflect those. The "--mediadir" option only needs the path up to your "media" directory. I.e., my media directory is "/media/pi/Seagate\ Expansion\ Drive/media", but the directory for the "--mediadir" option is "/media/pi/Seagate\ Expansion\ Drive". nik-presents has the following options:
+
+    usage: nik_presents_pi3.py [-h] --jsonfile JSONFILE --mediadir MEDIADIR
+                           [--timeout TIMEOUT] [--duration DURATION]
+                           [--verbose]
+
+    optional arguments:
+      -h, --help           show this help message and exit
+      --jsonfile JSONFILE  JSON file with tracks.
+      --mediadir MEDIADIR  Root directory for media.
+      --timeout TIMEOUT    Number of seconds for PIR timeout (Default 120).
+      --duration DURATION  Number of seconds images are shown (Default 8).
+      --verbose            Informational output to STDOUT.
 
 
 **9\.** The final step is to make nik-presents automatically start on boot and to hide the mouse cursor. Make sure to test out nik-presents on the command-line using your media files before doing this step (See below). Open the Raspberry Pi Configuration editor and under "Display", disable screen blanking. Go to the "/home/pi/.config/lxsession/LXDE-pi/" directory. If it does not exist, create it.
 
     cd /home/pi/.config/lxsession/LXDE-pi/
 
-In this directory, there should be a file called "autostart". If it doesn't exist, create it. Change the file so it looks like this:
+In this directory, there should be a file called "autostart". If it doesn't exist, create it. Change the file so the contents look like this:
 
 > @lxpanel --profile LXDE-pi
 >
@@ -110,6 +122,9 @@ There is a section (mine is under where it has [Seat:\*]) where you can specify 
 > xserver-command=X -nocursor
 
 Now reboot your Pi. It should log into the desktop and then after about 10 seconds nik-presents should start up.
+
+
+**10\.** When your media frame is running, you will be able to navigate through the tracks using your touchscreen. The first third of the screen, horizontally, is the "previous" button, i.e. go to the previous track. The middle third is "pause". The last third is "next". If the track is a video, then the top right corner of the screen becomes an unmute/mute button. Videos always start muted, so you can use the top right corner to unmute if you want to hear the sound. The volume is determined by the setting on your monitor. nik-presents will pause and turn off the monitor after a stretch of non-motion (default 120 seconds, can be set by the user). When motion is detected, the monitor turns on and nik-presents unpauses.
 
 
 ## Media (Pictures & Videos) conversion and configuration instructions
