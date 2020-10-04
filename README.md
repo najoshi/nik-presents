@@ -33,8 +33,29 @@ Currently, this software only works on the Pi3 running Raspbian. Below are instr
 * [PIR Motion Sensor](https://www.pishop.us/product/hc-sr501-pyroelectric-infrared-pir-motion-sensor-detector-module/)
 * [Female-to-Female jumper cables](https://www.pishop.us/product/female-to-female-jumper-cable-x-40-20cm/)
 * [Velcro strips](https://www.amazon.com/gp/product/B00006IC2T)
+* Cord Clips
+* Thin, semi-flexible, rubber-coated wire
 
 
 2. Put the Pi into the case and then insert the SD card (don't insert the SD card first!). Add velcro strips to the bottom of the case and matching strips on the back of the monitor. Do the same for the hard drive. They should be positioned like this:
 
 ![MonitorBack1](20200708_032649.small.jpg)
+
+I have also epoxied cord clips onto the back to hold the bundle of cords that will be there.
+
+
+3. Before you put the cover on the Pi case, you need to attach the jumper cables for the PIR. I used black for ground (GND), white for signal (OUT), and red for power (+5V). I attached the power to pin 2, the ground to pin 6, and the signal to pin 11 (GPIO17), like so:
+
+![jumpercables](20201003_043309.small.jpg)
+
+Yes, I know this is a picture of a Pi4, but the pinout is the same.
+
+
+4. Put the cover on the case. Attach the jumper cables to the PIR. Right below the pins on the PIR are the labels for GND, OUT, and +5V. Now, we will glue the PIR motion sensor to the monitor. I used some thin, rubber-coated wire to mount the sensor so that it peeks above the top of the monitor and used a hot glue gun to glue the wires to the back of the monitor:
+
+![pir](20201003_232640.small.jpg)
+
+
+5. Now attach all the other cables and use the cord clips to hold the cords. Attach the HDMI cable to the Pi and monitor. Attach the power supply to the Pi. Attach the USB cable from the monitor to the Pi (for the touchscreen mouse emulation). Attach the external hard drive to the Pi using the 3ft cable. After that is all done, it should look like this:
+
+![MonitorBack2](20200708_235537.small.jpg)

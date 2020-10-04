@@ -52,7 +52,7 @@ class MainWindow():
         self.rect=None
         self.timeout = timeout
         self.duration = 1000 * duration
-        self.pir = MotionSensor(17)
+        self.pir = MotionSensor(17) # GPIO17 is pin 11
         self.last_motion_time = time.time()
         
         self.pir.when_motion = self.do_motion
