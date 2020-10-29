@@ -71,7 +71,10 @@ class OMXDriver(object):
         # This crazy command sends a message to omxplayer using
         # dbus to set the volume to it's highest value (i.e. the max volume set for the monitor by the user) 
         subprocess.call("export DBUS_SESSION_BUS_ADDRESS=$(cat /tmp/omxplayerdbus.${USER:-root}); dbus-send --print-reply --session --reply-timeout=500 --dest=org.mpris.MediaPlayer2.omxplayer /org/mpris/MediaPlayer2 org.freedesktop.DBus.Properties.Set string:\"org.mpris.MediaPlayer2.Player\" string:\"Volume\" double:1.0", shell=True)
-        
+    
+    def seek(self, secs):
+        subprocess.call("export DBUS_SESSION_BUS_ADDRESS=$(cat /tmp/omxplayerdbus.${USER:-root}); dbus-send --print-reply=literal --session --dest=org.mpris.MediaPlayer2.omxplayer /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Seek int64: "+secs, shell=True)
+
     def pause(self):
         self._process.send('p')       
         if not self.paused:
