@@ -87,11 +87,13 @@ class MainWindow():
         y=event.y
         if self.verbose: print ("screen click, "+self.current_track["type"]+" track, X value: "+str(x), flush=True)
         if (x<640):
+            # touching first third of screen goes to previous track, unless
+            # track is video and touch is in lower left corner,
+            # then goes back 10 seconds.
             if (self.current_track["type"] == "video" and x<100 and y>980):
                 if self.verbose: print ("skipping back 10 secs", flush=True)
                 self.omx.seek(-10)
             else:
-                # touching first third of screen goes to previous track
                 if self.verbose: print ("going to previous track", flush=True)
                 self.prev_track()
         elif (x>=640 and x<1280):
@@ -105,7 +107,8 @@ class MainWindow():
         elif (x>=1280):
             # touching last third of screen goes to next track
             # unless track is video and touch is in upper right corner,
-            # then toggles mute
+            # then toggles mute. If touch is in lower right, skips forward
+            # 10 seconds.
             if (self.current_track["type"] == "video" and x>1820 and y<100):
                 if (self.omx.muted):
                     if self.verbose: print("Unmuting...")
