@@ -27,7 +27,7 @@ and modified for this project
 
 class OMXDriver(object):
 
-    _STATUS_REXP = "M:\s*(\w*)\s*V:"
+    _STATUS_REXP = "M:\s*(\w*)\s*V:.+\s+([-\d\.]+)s\/"
     _DONE_REXP = "have a nice day.*"
 
     # launch video with volume at lowest level (i.e. muted)
@@ -185,7 +185,24 @@ class OMXDriver(object):
             else:
                 #  - 3 matches _STATUS_REXP so get time stamp
                 self.video_position = float(self._process.match.group(1))
-                self.audio_position = 0.0             
+                self.audio_position = 0.0
+
+                # check to see if the omx player seconds has gone negative.
+                # a fix for some older videos where omxplayer doesn't exit
+                # after the end of the video
+                omx_secs = float(self._process.match.group(2))
+                if self.verbose: print("omx secs: '" + str(omx_secs) + "'", flush=True)
+                if (omx_secs < 0):
+                    self.end_play_signal=True
+                    self.xbefore=self._process.before
+                    self.xafter=self._process.after
+                    self.match=self._process.match
+                    self.end_play_reason='nice_day'
+
+                    subprocess.call("killall omxplayer omxplayer.bin", shell=True)
+
+                    break
+
             #sleep is Ok here as it is a seperate thread. self.widget.after has
             #funny effects as its not in the main thread.
             sleep(0.05)   # stats output rate seem to be about 170mS.
