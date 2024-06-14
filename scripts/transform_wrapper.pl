@@ -14,7 +14,7 @@ $mw->destroy;
 # close ($fn);
 
 # system ("/usr/bin/gnome-terminal -x echo /home/joshi/digital_media_frame/transform_media.pl $dirs; /bin/bash");
-system ("/usr/bin/xterm -geometry 238x34 -hold -e /home/joshi/digital_media_frame/scripts/transform_media.pl $dirstr");
+system ("/usr/bin/xterm -geometry 238x34 -hold -e /home/joshi/digital_media_frame_touch/scripts/transform_media.pl $dirstr");
 # system ("gnome-terminal -e \"bash -c /home/joshi/.local/share/nautilus/scripts/transform_wrapper.sh $dirs; bash\"");
 # system ("/usr/bin/xterm -hold -e echo /home/joshi/digital_media_frame/transform_media.pl");
 

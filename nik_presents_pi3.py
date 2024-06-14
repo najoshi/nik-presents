@@ -259,7 +259,7 @@ class MainWindow():
         
         # figure out wrap width for text and create wrapped text
         # if image width is <1800px then use image width to get wrap width
-        # if image width is >=1800px then wirte text across top in a black box
+        # if image width is >=1800px then write text across top in a black box
         final_text=''
         img_width = self.img.width()
         if (img_width < 1800):
