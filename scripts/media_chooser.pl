@@ -117,7 +117,7 @@ sub next_image {
     $country="";
     $gps="";
 
-    open(my $info, "exiftool \"$files[$filenum]\" |");
+    open(my $info, "~/bin/Image-ExifTool-12.98/exiftool \"$files[$filenum]\" |");
     while (<$info>) {
         chomp;
         #if (/GPS Position\s+: (.+)/) {$gps=$1; $gps=~s/deg/°/g; $gps=~s/ //g; $gps=~s/,/ /;}
@@ -139,7 +139,7 @@ sub next_image {
     }
     close($info);
 
-    open(my $info2, "exiftool -api geolocation \"-geolocation*\"  \"$files[$filenum]\" |");
+    open(my $info2, "~/bin/Image-ExifTool-12.98/exiftool -api geolocation \"-geolocation*\"  \"$files[$filenum]\" |");
     while (<$info2>) {
         chomp;
         if (/Geolocation City\s+: (.+)/) {$city=$1;}
@@ -164,8 +164,8 @@ sub next_image {
 	$mw->update;
 
 	if ($files[$filenum] =~ /mpe{0,1}g$/i || $files[$filenum] =~ /avi$/i || $files[$filenum] =~ /mp4$/i || $files[$filenum] =~ /mov$/i || $files[$filenum] =~ /mkv$/i) {
-		print ("totem \"$files[$filenum]\" 2> /dev/null");
-		system ("totem \"$files[$filenum]\" 2> /dev/null");
+		print ("mpv \"$files[$filenum]\" 2> /dev/null");
+		system ("mpv \"$files[$filenum]\" 2> /dev/null");
 	}
 }
 
@@ -244,7 +244,7 @@ $entry->bind("<Return>" => sub {next_image ("keep");});
 if (exists $ethash{$basename}) {$entry->Contents ($ethash{$basename});}
 
 $gps="";
-open(my $info, "exiftool \"$files[$filenum]\" |");
+open(my $info, "~/bin/Image-ExifTool-12.98/exiftool \"$files[$filenum]\" |");
 while (<$info>) {
     chomp;
     #if (/GPS Position\s+: (.+)/) {$gps=$1; $gps=~s/deg/°/g; $gps=~s/ //g; $gps=~s/,/ /;}
@@ -266,7 +266,7 @@ while (<$info>) {
 }
 close($info);
 
-open(my $info2, "exiftool -api geolocation \"-geolocation*\"  \"$files[$filenum]\" |");
+open(my $info2, "~/bin/Image-ExifTool-12.98/exiftool -api geolocation \"-geolocation*\"  \"$files[$filenum]\" |");
 while (<$info2>) {
     chomp;
     if (/Geolocation City\s+: (.+)/) {$city=$1;}
@@ -302,6 +302,6 @@ $entry2 = $fr2->Text(-width => 35, -height => 4, -wrap => "word", -font => "helv
 $entry->focus;
 $mw->update;
 
-if ($files[$filenum] !~ /jpe{0,1}g$/i && $files[$filenum] !~ /png$/i) {system ("totem \"$files[$filenum]\" 2> /dev/null");}
+if ($files[$filenum] !~ /jpe{0,1}g$/i && $files[$filenum] !~ /png$/i) {system ("mpv \"$files[$filenum]\" 2> /dev/null");}
 
 $mw->MainLoop;

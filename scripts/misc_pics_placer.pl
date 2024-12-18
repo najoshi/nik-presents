@@ -97,8 +97,8 @@ sub next_image {
 	$mw->update;
 
 	if ($files[$filenum] =~ /mpe{0,1}g$/i || $files[$filenum] =~ /avi$/i || $files[$filenum] =~ /mp4$/i || $files[$filenum] =~ /mov$/i || $files[$filenum] =~ /mkv$/i) {
-		print ("totem \"$files[$filenum]\" 2> /dev/null");
-		system ("totem \"$files[$filenum]\" 2> /dev/null");
+		print ("mpv \"$files[$filenum]\" 2> /dev/null");
+		system ("mpv \"$files[$filenum]\" 2> /dev/null");
 	}
 }
 
@@ -192,6 +192,6 @@ $lb->insert('end', @folders);
 $entry->focus;
 $mw->update;
 
-if ($files[$filenum] !~ /jpe{0,1}g$/i && $files[$filenum] !~ /png$/i) {system ("totem \"$files[$filenum]\" 2> /dev/null");}
+if ($files[$filenum] !~ /jpe{0,1}g$/i && $files[$filenum] !~ /png$/i) {system ("mpv \"$files[$filenum]\" 2> /dev/null");}
 
 $mw->MainLoop;

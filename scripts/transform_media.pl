@@ -45,9 +45,21 @@ sub process_jpg {
 
 	#system ("exifautotran \"$thefile\"");
 	#system ("jhead -autorot \"$thefile\"");
-	system ("convert -auto-orient -resize $GEOM \"$thefile\" \"$newfile\"");
+	
+	my $rotate="";
+    my $orient;
+    my $angle;
+	my $camtype = `exiftool -HostComputer "$thefile"`;
+	if ($camtype =~ /iphone/i) {
+        $orient = `exiftool -Orientation "$thefile"`;
+        if (($angle) = $orient =~ /Rotate (\d+) CW/) {
+            $rotate = "-rotate -$angle"
+        }
+	}
+
+	system ("convert -auto-orient $rotate -resize $GEOM \"$thefile\" \"$newfile\"");
 	if (-s $newfile > 1100000) {
-		system ("convert -auto-orient -resize $GEOM -quality 90 \"$thefile\" \"$newfile\"");
+		system ("convert -auto-orient $rotate -resize $GEOM -quality 90 \"$thefile\" \"$newfile\"");
 	}
 	#system ("mv \"$thefile\" \"$newfile\"");
 	system ("rm \"$thefile\"");
@@ -97,6 +109,15 @@ sub process_video {
 		system ("avconv -i \"$thefile\" \"$newmp4\"");
 		system ("rm \"$thefile\"");
 	}
+
+    if ($ext eq "MP4") {
+        my $tmpfile = "$thefile.tmp.mp4";
+        system("ffmpeg -i \"$thefile\" -vf scale=1920x1080 -pix_fmt yuv420p \"$tmpfile\"");
+        my $newfile = $thefile;
+        $newfile =~ s/MP4/mp4/g;
+        system("mv \"$tmpfile\" \"$newfile\"");
+        system("rm \"$thefile\"");
+    }
 
 	#my $rot = `mediainfo --Inform="Video;%Rotation%" "$thefile"`;
 	#chomp $rot;
