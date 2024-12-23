@@ -7,9 +7,10 @@ import argparse
 import os
 import threading
 
+
 import gi
 gi.require_version('Gtk', '4.0')
-from gi.repository import Gtk, Gdk
+from gi.repository import Gtk, Gdk, GLib
 from gtk4_mpv import MyRenderer
 
 
@@ -115,8 +116,10 @@ class MainWindow(Gtk.ApplicationWindow):
         self.set_child(self.box)
 
         # set a timer for the duration of the image
-        self.image_timer = threading.Timer(self.duration, self.next_track)
-        self.image_timer.start()
+
+        GLib.timeout_add_seconds(self.duration, self.next_track)
+        # self.image_timer = threading.Timer(self.duration, self.next_track)
+        # self.image_timer.start()
 
 
     def play_video(self):
