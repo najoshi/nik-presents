@@ -31,6 +31,7 @@ class MainWindow(Gtk.ApplicationWindow):
         css_provider.load_from_path(sys.path[0] + "/" + "style.css")
         Gtk.StyleContext.add_provider_for_display(Gdk.Display.get_default(), css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
+        # using CSS to set background color
         self.set_css_classes(['appbg'])
 
         self.box = None
@@ -61,11 +62,6 @@ class MainWindow(Gtk.ApplicationWindow):
 
 
     def next_track(self):
-
-        if self.image_timer:
-            print("in timer cancel")
-            self.image_timer.cancel()
-
         # if self.renderer:
         #     self.renderer._mpv.terminate()
 
@@ -93,33 +89,45 @@ class MainWindow(Gtk.ApplicationWindow):
 
         # get the width of the image
         image_width = self.image.get_paintable().get_intrinsic_width()
+        image_height = self.image.get_paintable().get_intrinsic_height()
 
         label_text = ""
+        # if image is less than 1800 wide, then put text to left of image,
+        # otherwise put it above image.
         if image_width < 1800:
             label_text = self.current_track["trip-text"] + "\n\n" + self.current_track["annot-text"]
+            self.box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+            self.box.set_css_classes(['appbg'])
+
+            self.label = Gtk.Label(label=label_text)
+            # set label size based on centering the image horizontally
+            self.label.set_size_request((1920 - image_width) / 2, -1)
+            self.label.set_wrap(True)
+            self.label.set_css_classes(['annot'])
+            self.label.set_xalign(0)
+            self.label.set_yalign(0)
         else:
-            label_text = self.current_track["trip-text"] + " - " + self.current_track["annot-text"]
+            label_text = self.current_track["trip-text"]
+            if self.current_track["annot-text"]:
+                label_text += " - " + self.current_track["annot-text"]
+            self.box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+            self.box.set_css_classes(['appbg'])
 
-        self.box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-        self.box.set_css_classes(['appbg'])
+            self.label = Gtk.Label(label=label_text)
+            # set label size based on centering the image vertically
+            self.label.set_size_request(-1, (1080 - image_height) / 2)
+            self.label.set_wrap(True)
+            self.label.set_css_classes(['annot'])
+            self.label.set_xalign(0)
+            self.label.set_yalign(0)
 
-        self.label = Gtk.Label(label=label_text)
-        # set label size based on centering the image
-        self.label.set_size_request((1920 - image_width) / 2, -1)
-        self.label.set_wrap(True)
-        self.label.set_css_classes(['annot'])
-        self.label.set_xalign(0)
-        self.label.set_yalign(0)
 
         self.box.append(self.label)
         self.box.append(self.image)
         self.set_child(self.box)
 
         # set a timer for the duration of the image
-
         GLib.timeout_add_seconds(self.duration, self.next_track)
-        # self.image_timer = threading.Timer(self.duration, self.next_track)
-        # self.image_timer.start()
 
 
     def play_video(self):
@@ -130,6 +138,7 @@ class MainWindow(Gtk.ApplicationWindow):
         self.renderer._mpv.observe_property('eof-reached', self.handlePropertyChange)
         self.set_child(self.renderer)
         print("end of play video")
+
 
     def on_renderer_ready(self, *_):
         print("in renderer ready")
