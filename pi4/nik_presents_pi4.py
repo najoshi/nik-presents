@@ -28,7 +28,7 @@ class MainWindow(Gtk.ApplicationWindow):
 
         # set up CSS for styling widgets
         css_provider = Gtk.CssProvider()
-        css_provider.load_from_path('/home/joshi/nik-presents/pi4/style.css')
+        css_provider.load_from_path('style.css')
         Gtk.StyleContext.add_provider_for_display(Gdk.Display.get_default(), css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
         self.set_css_classes(['appbg'])
