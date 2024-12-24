@@ -87,7 +87,7 @@ class MainWindow(Gtk.ApplicationWindow):
     def process_image(self):
         self.image = Gtk.Picture.new_for_filename(self.complete_path(self.current_track["location"]))
 
-        # get the width of the image
+        # get the width and height of the image
         image_width = self.image.get_paintable().get_intrinsic_width()
         image_height = self.image.get_paintable().get_intrinsic_height()
 
@@ -151,8 +151,9 @@ class MainWindow(Gtk.ApplicationWindow):
 
         if (name == 'eof-reached' and value == True):
             print('here')
-            del self.renderer
-            self.next_track()
+            # del self.renderer
+            # self.next_track()
+            GLib.idle_add(self.next_track)
 
     def complete_path(self,track_file):
         #  complete path of the filename of the selected entry
