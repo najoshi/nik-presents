@@ -7,6 +7,8 @@ import argparse
 import os
 import threading
 
+from OpenGL.GL import *
+import numpy as np
 
 import gi
 gi.require_version('Gtk', '4.0')
@@ -102,10 +104,7 @@ class MainWindow(Gtk.ApplicationWindow):
             self.label = Gtk.Label(label=label_text)
             # set label size based on centering the image horizontally
             self.label.set_size_request((1920 - image_width) / 2, -1)
-            self.label.set_wrap(True)
-            self.label.set_css_classes(['annot'])
-            self.label.set_xalign(0)
-            self.label.set_yalign(0)
+
         else:
             label_text = self.current_track["trip-text"]
             if self.current_track["annot-text"]:
@@ -116,16 +115,16 @@ class MainWindow(Gtk.ApplicationWindow):
             self.label = Gtk.Label(label=label_text)
             # set label size based on centering the image vertically
             self.label.set_size_request(-1, (1080 - image_height) / 2)
-            self.label.set_wrap(True)
-            self.label.set_css_classes(['annot'])
-            self.label.set_xalign(0)
-            self.label.set_yalign(0)
 
-
+        self.label.set_wrap(True)
+        self.label.set_css_classes(['annot'])
+        self.label.set_xalign(0)
+        self.label.set_yalign(0)
         self.box.append(self.label)
         self.box.append(self.image)
+        print("about to set child")
         self.set_child(self.box)
-
+        
         # set a timer for the duration of the image
         GLib.timeout_add_seconds(self.duration, self.next_track)
 
