@@ -300,8 +300,8 @@ class MainWindow():
 parser = argparse.ArgumentParser()
 parser.add_argument("--jsonfile", help="JSON file with tracks.", required=True)
 parser.add_argument("--mediadir", help="Root directory for media.", required=True)
-parser.add_argument("--timeout", help="Number of seconds for PIR timeout (Default 120).", default=120)
-parser.add_argument("--duration", help="Number of seconds images are shown (Default 8).", default=8)
+parser.add_argument("--timeout", help="Number of seconds for PIR timeout (Default 120).", default=120, type=int)
+parser.add_argument("--duration", help="Number of seconds images are shown (Default 8).", default=8, type=int)
 parser.add_argument("--verbose", help="Informational output to STDOUT.", default=False, action='store_true')
 args = parser.parse_args()
 
