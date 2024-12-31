@@ -40,17 +40,22 @@ class MainWindow(Gtk.ApplicationWindow):
         self.image = None
         self.renderer = None
         self.label = None
-        self.image_timer = None
         self.track_number = -1
         self.verbose = verbose
         self.media_home = media_home
         self.duration = duration
+        self.canvas = Gtk.Fixed()
 
         # set up key press 'q' for quitting
         evk_quit = Gtk.EventControllerKey.new()
         evk_quit.connect("key-pressed", self.key_press)
         self.add_controller(evk_quit)
 
+        evk_mouse = Gtk.GestureClick.new()
+        evk_mouse.connect("pressed", self.onClick)
+        self.add_controller(evk_mouse)
+        
+        self.set_child(self.canvas)
         self.fullscreen()
         self.next_track()
 
@@ -58,9 +63,10 @@ class MainWindow(Gtk.ApplicationWindow):
     def key_press(self, event, keyval, keycode, state):
         # check if keypress is 'q'
         if keyval == Gdk.KEY_q:
-            if self.image_timer:
-                self.image_timer.cancel()
             self.close()
+            
+    def onClick(self, gesture, data, x, y):
+        print("got click",x,y)
 
 
     def next_track(self):
@@ -122,20 +128,24 @@ class MainWindow(Gtk.ApplicationWindow):
         self.label.set_yalign(0)
         self.box.append(self.label)
         self.box.append(self.image)
-        print("about to set child")
-        self.set_child(self.box)
+        self.box.set_size_request(1920,1080)
         
+        self.canvas.put(self.box,0,0)
+        
+        print("about to set timer")
         # set a timer for the duration of the image
         GLib.timeout_add_seconds(self.duration, self.next_track)
 
 
     def play_video(self):
         print("in play video")
-        # self.box.remove(self.image)
+        # if self.box:
+            # self.canvas.remove(self.box)
         self.renderer = MyRenderer()
         self.renderer.connect("realize", self.on_renderer_ready)
         self.renderer._mpv.observe_property('eof-reached', self.handlePropertyChange)
-        self.set_child(self.renderer)
+        self.renderer.set_size_request(1920,1080)
+        self.canvas.put(self.renderer,0,0)
         print("end of play video")
 
 
@@ -150,6 +160,7 @@ class MainWindow(Gtk.ApplicationWindow):
 
         if (name == 'eof-reached' and value == True):
             print('here')
+            # self.renderer._mpv.quit(-1)
             # del self.renderer
             # self.next_track()
             GLib.idle_add(self.next_track)
