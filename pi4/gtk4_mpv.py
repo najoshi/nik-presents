@@ -59,7 +59,7 @@ class MyRenderer(Gtk.GLArea):
         self.set_auto_render(False)
         self.connect("realize", self.on_realize)
 
-        self._mpv = MPV(vo="libmpv", keep_open="yes", hwdec="auto-copy")
+        self._mpv = MPV(vo="libmpv", keep_open="yes", hwdec="drm-copy")
         self._ctx = None
         self._ctx_opengl_params = {'get_proc_address': MpvGlGetProcAddressFn(GetProcAddressGetter().wrap)}
 

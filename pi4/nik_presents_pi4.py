@@ -7,9 +7,6 @@ import argparse
 import os
 import threading
 
-from OpenGL.GL import *
-import numpy as np
-
 import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gdk, GLib
@@ -44,6 +41,9 @@ class MainWindow(Gtk.ApplicationWindow):
         self.verbose = verbose
         self.media_home = media_home
         self.duration = duration
+        # can't use the window directly, have to use a canvas
+        # to place widgets on. If you use the window directly,
+        # you get openGL errors on a video to image transition.
         self.canvas = Gtk.Fixed()
 
         # set up key press 'q' for quitting
@@ -66,7 +66,8 @@ class MainWindow(Gtk.ApplicationWindow):
             self.close()
             
     def onClick(self, gesture, data, x, y):
-        print("got click",x,y)
+        if self.verbose:
+            print("got click",x,y)
 
 
     def next_track(self):
@@ -91,6 +92,23 @@ class MainWindow(Gtk.ApplicationWindow):
         elif (self.current_track["type"] == "video"):
             self.play_video()
 
+    def prev_track(self):
+        
+        # decrement the track number by 1
+        # if at beginning of tracks, then set track number to last track
+        self.track_number -= 1
+        if self.track_number == -1:
+            self.track_number = len(self.tracks)-1
+            
+        self.current_track = self.tracks[self.track_number]
+        
+        if self.verbose:
+            print("playing track "+str(self.track_number)+": "+self.current_track['location'], flush=True)
+        
+        if (self.current_track["type"] == "image"):
+            self.process_image()
+        elif (self.current_track["type"] == "video"):
+            self.play_video()
 
     def process_image(self):
         self.image = Gtk.Picture.new_for_filename(self.complete_path(self.current_track["location"]))
@@ -128,6 +146,7 @@ class MainWindow(Gtk.ApplicationWindow):
         self.label.set_yalign(0)
         self.box.append(self.label)
         self.box.append(self.image)
+        # have to set size request, otherwise you get nothing
         self.box.set_size_request(1920,1080)
         
         self.canvas.put(self.box,0,0)
@@ -144,6 +163,7 @@ class MainWindow(Gtk.ApplicationWindow):
         self.renderer = MyRenderer()
         self.renderer.connect("realize", self.on_renderer_ready)
         self.renderer._mpv.observe_property('eof-reached', self.handlePropertyChange)
+        # have to set size request, otherwise you get nothing
         self.renderer.set_size_request(1920,1080)
         self.canvas.put(self.renderer,0,0)
         print("end of play video")
@@ -158,11 +178,9 @@ class MainWindow(Gtk.ApplicationWindow):
         if self.verbose:
             print('property change', name, value)
 
+        # check to see if the video has ended
         if (name == 'eof-reached' and value == True):
             print('here')
-            # self.renderer._mpv.quit(-1)
-            # del self.renderer
-            # self.next_track()
             GLib.idle_add(self.next_track)
 
     def complete_path(self,track_file):
