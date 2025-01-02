@@ -10,7 +10,8 @@ import threading
 import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gdk, GLib
-from gtk4_mpv import MyRenderer
+
+from gtk4_mpv import MPVRenderer
 
 
 class MainWindow(Gtk.ApplicationWindow):
@@ -34,10 +35,15 @@ class MainWindow(Gtk.ApplicationWindow):
         self.set_css_classes(['appbg'])
 
         self.box = None
+        self.box2 = None
         self.image = None
         self.renderer = None
         self.label = None
+        self.glib_timer = None
+        self.timer_active = False
+        self.paused = False
         self.track_number = -1
+        self.current_track = None
         self.verbose = verbose
         self.media_home = media_home
         self.duration = duration
@@ -63,17 +69,64 @@ class MainWindow(Gtk.ApplicationWindow):
     def key_press(self, event, keyval, keycode, state):
         # check if keypress is 'q'
         if keyval == Gdk.KEY_q:
+            if self.verbose: print("quitting")
             self.close()
             
     def onClick(self, gesture, data, x, y):
         if self.verbose:
             print("got click",x,y)
+            
+        if (x<640):
+            # touching first third of screen goes to previous track, unless
+            # track is video and touch is in lower left corner,
+            # then goes back 10 seconds.
+            if (self.current_track["type"] == "video" and x<100 and y>980):
+                if self.verbose: print ("skipping back 10 secs", flush=True)
+                self.renderer._mpv.seek(-10, reference="relative")
+            else:
+                if self.verbose: print ("going to previous track", flush=True)
+                GLib.idle_add(self.prev_track)
+                
+        elif (x>=640 and x<1280):
+            # touching middle third of screen pauses track
+            if (self.paused):
+                if self.verbose: print ("turning off pause", flush=True)
+                self.pause_off()
+            else:
+                if self.verbose: print ("turning on pause", flush=True)
+                self.pause_on()
+                
+        elif (x>=1280):
+            # touching last third of screen goes to next track
+            # unless track is video and touch is in upper right corner,
+            # then toggles mute. If touch is in lower right, skips forward
+            # 10 seconds.
+            if (self.current_track["type"] == "video" and x>1820 and y<100):
+                if (self.renderer._mpv.mute):
+                    if self.verbose: print("Unmuting...")
+                    self.renderer._mpv.mute = False
+                else:
+                    if self.verbose: print("Muting...")
+                    self.renderer._mpv.mute = True
+            elif (self.current_track["type"] == "video" and x>1820 and y>980):
+                if self.verbose: print ("skipping forward 10 secs", flush=True)
+                self.renderer._mpv.seek(10, reference="relative")
+            else:
+                if self.verbose: print ("going to next track", flush=True)
+                GLib.idle_add(self.next_track)
 
 
     def next_track(self):
-        # if self.renderer:
-        #     self.renderer._mpv.terminate()
-
+        # cancel the image timer
+        if self.glib_timer and self.timer_active:
+            GLib.source_remove(self.glib_timer)
+            self.timer_active = False
+        
+        # terminate the video
+        if self.renderer:
+            # this causes the "eof-property" to be set to True
+            self.renderer._mpv.command("stop")
+        
         # increment the track number by 1
         # if at end of tracks, then shuffle tracks and
         # set track number to first track
@@ -92,13 +145,22 @@ class MainWindow(Gtk.ApplicationWindow):
         elif (self.current_track["type"] == "video"):
             self.play_video()
 
+
     def prev_track(self):
+        # cancel the image timer
+        if self.glib_timer and self.timer_active:
+            GLib.source_remove(self.glib_timer)
+            self.timer_active = False
+        
+        # terminate the video
+        if self.renderer:
+            self.renderer._mpv.command("stop")
         
         # decrement the track number by 1
         # if at beginning of tracks, then set track number to last track
         self.track_number -= 1
         if self.track_number == -1:
-            self.track_number = len(self.tracks)-1
+            self.track_number = 0
             
         self.current_track = self.tracks[self.track_number]
         
@@ -109,6 +171,45 @@ class MainWindow(Gtk.ApplicationWindow):
             self.process_image()
         elif (self.current_track["type"] == "video"):
             self.play_video()
+
+
+    def pause_on(self):
+        # if already paused, then don't need to do anything
+        if (self.paused):
+            return
+        
+        self.paused = True
+        
+        if (self.current_track["type"] == "image"):
+            # cancel the image timer
+            if self.glib_timer:
+                GLib.source_remove(self.glib_timer)
+                self.timer_active = False
+            self.pause_label.set_text("Paused...")
+            
+        elif (self.current_track["type"] == "video"):
+            # pause the video and show "Paused..." text
+            # with a long duration so it doesn't disappear
+            self.renderer._mpv.pause = True
+            self.renderer._mpv.command("show_text", "Paused...", 100000)
+            
+    def pause_off(self):
+        # if already unpaused, then don't need to do anything
+        if (not self.paused):
+            return
+        
+        self.paused = False
+        
+        if (self.current_track["type"] == "image"):
+            self.pause_label.set_text("")
+            self.glib_timer = GLib.timeout_add_seconds(self.duration, self.next_track)
+            self.timer_active = True
+            
+        elif (self.current_track["type"] == "video"):
+            # unpause the video and remove the "Paused..." text
+            self.renderer._mpv.pause = False
+            self.renderer._mpv.command("show_text", "")
+
 
     def process_image(self):
         self.image = Gtk.Picture.new_for_filename(self.complete_path(self.current_track["location"]))
@@ -123,54 +224,69 @@ class MainWindow(Gtk.ApplicationWindow):
         if image_width < 1800:
             label_text = self.current_track["trip-text"] + "\n\n" + self.current_track["annot-text"]
             self.box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+            self.box2 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
             self.box.set_css_classes(['appbg'])
 
             self.label = Gtk.Label(label=label_text)
             # set label size based on centering the image horizontally
             self.label.set_size_request((1920 - image_width) / 2, -1)
+            self.label.set_vexpand(True)
 
         else:
             label_text = self.current_track["trip-text"]
             if self.current_track["annot-text"]:
                 label_text += " - " + self.current_track["annot-text"]
             self.box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+            self.box2 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
             self.box.set_css_classes(['appbg'])
 
             self.label = Gtk.Label(label=label_text)
             # set label size based on centering the image vertically
             self.label.set_size_request(-1, (1080 - image_height) / 2)
+            self.label.set_hexpand(True)
 
         self.label.set_wrap(True)
         self.label.set_css_classes(['annot'])
         self.label.set_xalign(0)
         self.label.set_yalign(0)
-        self.box.append(self.label)
+        
+        self.pause_label = Gtk.Label()
+        self.pause_label.set_css_classes(['annot'])
+        self.pause_label.set_xalign(0)
+        self.pause_label.set_yalign(0)
+        self.pause_label.set_size_request(100,50)
+        
+        self.box2.set_css_classes(['appbg'])
+        self.box2.append(self.label)
+        self.box2.append(self.pause_label)
+        
+        self.box.append(self.box2)
         self.box.append(self.image)
         # have to set size request, otherwise you get nothing
         self.box.set_size_request(1920,1080)
         
         self.canvas.put(self.box,0,0)
         
-        print("about to set timer")
         # set a timer for the duration of the image
-        GLib.timeout_add_seconds(self.duration, self.next_track)
+        self.glib_timer = GLib.timeout_add_seconds(self.duration, self.next_track)
+        self.timer_active = True
 
 
-    def play_video(self):
-        print("in play video")
-        # if self.box:
-            # self.canvas.remove(self.box)
-        self.renderer = MyRenderer()
+    def play_video(self):        
+        if self.verbose:
+            print ("playing video "+self.current_track['location'], flush=True)
+        
+        # set subtitle path
+        self.renderer = MPVRenderer(subfile=self.complete_path(self.current_track['omx-subtitles']))
+            
         self.renderer.connect("realize", self.on_renderer_ready)
         self.renderer._mpv.observe_property('eof-reached', self.handlePropertyChange)
         # have to set size request, otherwise you get nothing
         self.renderer.set_size_request(1920,1080)
         self.canvas.put(self.renderer,0,0)
-        print("end of play video")
 
 
     def on_renderer_ready(self, *_):
-        print("in renderer ready")
         self.renderer.play(self.complete_path(self.current_track['location']))
 
 
@@ -180,7 +296,7 @@ class MainWindow(Gtk.ApplicationWindow):
 
         # check to see if the video has ended
         if (name == 'eof-reached' and value == True):
-            print('here')
+            # go to next track
             GLib.idle_add(self.next_track)
 
     def complete_path(self,track_file):
@@ -191,7 +307,7 @@ class MainWindow(Gtk.ApplicationWindow):
     
 
 
-class MyApp(Gtk.Application):
+class DMFApp(Gtk.Application):
     def __init__(self, jsonfile, mediadir, timeout, duration, verbose):
         super().__init__()
         self.jsonfile = jsonfile
@@ -230,5 +346,5 @@ if (not os.path.isdir(args.mediadir)):
     print("Error: Media directory path '"+args.mediadir+"' is not a directory.", file=sys.stdout)
     sys.exit(1)
 
-app = MyApp(args.jsonfile, args.mediadir, args.timeout, args.duration, args.verbose)
+app = DMFApp(args.jsonfile, args.mediadir, args.timeout, args.duration, args.verbose)
 app.run()

@@ -52,14 +52,14 @@ class MyApplication(Gtk.Application):
         win.present()
 
 
-class MyRenderer(Gtk.GLArea):
+class MPVRenderer(Gtk.GLArea):
 
-    def __init__(self, **properties):
+    def __init__(self, subfile="", **properties):
         super().__init__(**properties)
         self.set_auto_render(False)
         self.connect("realize", self.on_realize)
 
-        self._mpv = MPV(vo="libmpv", keep_open="yes", hwdec="drm-copy")
+        self._mpv = MPV(vo="libmpv", keep_open="yes", hwdec="auto-copy", osd_align_x="left", osd_align_y="bottom", osd_font_size=30, sub_files=subfile, sub_font_size=30, mute="yes")
         self._ctx = None
         self._ctx_opengl_params = {'get_proc_address': MpvGlGetProcAddressFn(GetProcAddressGetter().wrap)}
 
