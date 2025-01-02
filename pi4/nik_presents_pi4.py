@@ -65,11 +65,11 @@ class MainWindow(Gtk.ApplicationWindow):
         evk_mouse.connect("pressed", self.onClick)
         self.add_controller(evk_mouse)
         
-        # self.pir = MotionSensor(23)
-        # self.pir.when_motion = self.do_motion
-        # self.last_motion_time = time.time()
-        # # call check_timeout every 100 milliseconds
-        # GLib.timeout_add(100, self.check_timeout)
+        self.pir = MotionSensor(23)
+        self.pir.when_motion = self.do_motion
+        self.last_motion_time = time.time()
+        # call check_timeout every 100 milliseconds
+        GLib.timeout_add(100, self.check_timeout)
         
         self.set_child(self.canvas)
         self.fullscreen()
@@ -108,9 +108,10 @@ class MainWindow(Gtk.ApplicationWindow):
             self.fullscreen()
         elif keyval == Gdk.KEY_d:
             self.running = True
+            self.turn_on_monitor()
+            print("about to fullscreen")
             self.fullscreen()
             self.pause_off()
-            self.turn_on_monitor()
             
             
     def onClick(self, gesture, data, x, y):
