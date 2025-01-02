@@ -5,12 +5,14 @@ import random
 import json
 import argparse
 import os
-import threading
+import time
+import subprocess
 
 import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gdk, GLib
 
+from gpiozero import MotionSensor
 from gtk4_mpv import MPVRenderer
 
 
@@ -41,12 +43,14 @@ class MainWindow(Gtk.ApplicationWindow):
         self.label = None
         self.glib_timer = None
         self.timer_active = False
+        self.running = True
         self.paused = False
         self.track_number = -1
         self.current_track = None
         self.verbose = verbose
         self.media_home = media_home
         self.duration = duration
+        self.timeout = timeout
         # can't use the window directly, have to use a canvas
         # to place widgets on. If you use the window directly,
         # you get openGL errors on a video to image transition.
@@ -61,16 +65,53 @@ class MainWindow(Gtk.ApplicationWindow):
         evk_mouse.connect("pressed", self.onClick)
         self.add_controller(evk_mouse)
         
+        # self.pir = MotionSensor(23)
+        # self.pir.when_motion = self.do_motion
+        # self.last_motion_time = time.time()
+        # # call check_timeout every 100 milliseconds
+        # GLib.timeout_add(100, self.check_timeout)
+        
         self.set_child(self.canvas)
         self.fullscreen()
         self.next_track()
 
+
+    def check_timeout(self):
+        # if the current time is greater than the last time there was motion
+        # plus the timeout, then turn off the monitor and pause
+        if (self.running and (time.time() > (self.last_motion_time + self.timeout))):
+            if self.verbose: print("timeout reached, turning off", flush=True)
+            self.running = False
+            self.pause_on()
+            self.turn_off_monitor()
+        return True
+        
+    def do_motion(self):
+        if self.verbose: print("detected motion", flush=True)
+        self.last_motion_time = time.time()
+        if (not self.running):
+            print("here")
+            self.running = True
+            self.turn_on_monitor()
+            self.pause_off()
+            self.fullscreen()
 
     def key_press(self, event, keyval, keycode, state):
         # check if keypress is 'q'
         if keyval == Gdk.KEY_q:
             if self.verbose: print("quitting")
             self.close()
+        elif keyval == Gdk.KEY_a:
+            self.running = False
+            self.pause_on()
+            self.turn_off_monitor()
+            self.fullscreen()
+        elif keyval == Gdk.KEY_d:
+            self.running = True
+            self.fullscreen()
+            self.pause_off()
+            self.turn_on_monitor()
+            
             
     def onClick(self, gesture, data, x, y):
         if self.verbose:
@@ -99,8 +140,8 @@ class MainWindow(Gtk.ApplicationWindow):
         elif (x>=1280):
             # touching last third of screen goes to next track
             # unless track is video and touch is in upper right corner,
-            # then toggles mute. If touch is in lower right, skips forward
-            # 10 seconds.
+            # then toggles mute. If track is video and touch is in lower 
+            # right, then it skips forward 10 seconds.
             if (self.current_track["type"] == "video" and x>1820 and y<100):
                 if (self.renderer._mpv.mute):
                     if self.verbose: print("Unmuting...")
@@ -108,12 +149,23 @@ class MainWindow(Gtk.ApplicationWindow):
                 else:
                     if self.verbose: print("Muting...")
                     self.renderer._mpv.mute = True
+                    
             elif (self.current_track["type"] == "video" and x>1820 and y>980):
                 if self.verbose: print ("skipping forward 10 secs", flush=True)
                 self.renderer._mpv.seek(10, reference="relative")
+                
             else:
                 if self.verbose: print ("going to next track", flush=True)
                 GLib.idle_add(self.next_track)
+       
+                
+    def turn_on_monitor(self):
+        subprocess.call("ddcutil setvcp D6 04", shell=True)
+        #subprocess.call("wlr-randr --output HDMI-A-1 --on", shell=True)
+        
+    def turn_off_monitor(self):
+        subprocess.call("ddcutil setvcp D6 05", shell=True)
+        #subprocess.call("wlr-randr --output HDMI-A-1 --off", shell=True)
 
 
     def next_track(self):
@@ -213,7 +265,13 @@ class MainWindow(Gtk.ApplicationWindow):
 
 
     def process_image(self):
-        self.image = Gtk.Picture.new_for_filename(self.complete_path(self.current_track["location"]))
+        
+        image_path = self.complete_path(self.current_track["location"])
+
+        if (not os.path.exists(image_path)):
+            print("image not found:",image_path)
+
+        self.image = Gtk.Picture.new_for_filename(image_path)
 
         # get the width and height of the image
         image_width = self.image.get_paintable().get_intrinsic_width()
@@ -277,8 +335,8 @@ class MainWindow(Gtk.ApplicationWindow):
         if self.verbose:
             print ("playing video "+self.current_track['location'], flush=True)
         
-        # set subtitle path
-        self.renderer = MPVRenderer(subfile=self.complete_path(self.current_track['omx-subtitles']))
+        # instantiate MPVRenderer and set subtitle path
+        self.renderer = MPVRenderer(subfile=self.complete_path(self.current_track['subtitles-file']))
             
         self.renderer.connect("realize", self.on_renderer_ready)
         self.renderer._mpv.observe_property('eof-reached', self.handlePropertyChange)
@@ -288,7 +346,10 @@ class MainWindow(Gtk.ApplicationWindow):
 
 
     def on_renderer_ready(self, *_):
-        self.renderer.play(self.complete_path(self.current_track['location']))
+        video_path = self.complete_path(self.current_track['location'])
+        if (not os.path.exists(video_path)):
+            print("image not found:",video_path)
+        self.renderer.play(video_path)
 
 
     def handlePropertyChange(self, name, value):
