@@ -26,7 +26,7 @@ class MainWindow(Gtk.ApplicationWindow):
 
         self.tracks = json.loads(data)["tracks"]
         #shuffle the tracks so that they are random
-        # random.shuffle(self.tracks)
+        random.shuffle(self.tracks)
 
         # set up CSS for styling widgets
         css_provider = Gtk.CssProvider()
@@ -41,6 +41,7 @@ class MainWindow(Gtk.ApplicationWindow):
         self.image = None
         self.renderer = None
         self.label = None
+        self.pause_label = None
         self.glib_timer = None
         self.timer_active = False
         self.running = True
@@ -65,6 +66,7 @@ class MainWindow(Gtk.ApplicationWindow):
         evk_mouse.connect("pressed", self.onClick)
         self.add_controller(evk_mouse)
         
+        # set up motion sensor
         self.pir = MotionSensor(23)
         self.pir.when_motion = self.do_motion
         self.last_motion_time = time.time()
@@ -90,7 +92,6 @@ class MainWindow(Gtk.ApplicationWindow):
         if self.verbose: print("detected motion", flush=True)
         self.last_motion_time = time.time()
         if (not self.running):
-            print("here")
             self.running = True
             self.turn_on_monitor()
             self.pause_off()
@@ -101,17 +102,6 @@ class MainWindow(Gtk.ApplicationWindow):
         if keyval == Gdk.KEY_q:
             if self.verbose: print("quitting")
             self.close()
-        elif keyval == Gdk.KEY_a:
-            self.running = False
-            self.pause_on()
-            self.turn_off_monitor()
-            self.fullscreen()
-        elif keyval == Gdk.KEY_d:
-            self.running = True
-            self.turn_on_monitor()
-            print("about to fullscreen")
-            self.fullscreen()
-            self.pause_off()
             
             
     def onClick(self, gesture, data, x, y):
@@ -132,10 +122,8 @@ class MainWindow(Gtk.ApplicationWindow):
         elif (x>=640 and x<1280):
             # touching middle third of screen pauses track
             if (self.paused):
-                if self.verbose: print ("turning off pause", flush=True)
                 self.pause_off()
             else:
-                if self.verbose: print ("turning on pause", flush=True)
                 self.pause_on()
                 
         elif (x>=1280):
@@ -170,6 +158,9 @@ class MainWindow(Gtk.ApplicationWindow):
 
 
     def next_track(self):
+        # turn off pause if necessary
+        self.pause_off()
+        
         # cancel the image timer
         if self.glib_timer and self.timer_active:
             GLib.source_remove(self.glib_timer)
@@ -183,7 +174,7 @@ class MainWindow(Gtk.ApplicationWindow):
         
         # increment the track number by 1
         # if at end of tracks, then shuffle tracks and
-        # set track number to first track
+        # set track number to 0
         self.track_number += 1
         if self.track_number == len(self.tracks):
             random.shuffle(self.tracks)
@@ -201,6 +192,9 @@ class MainWindow(Gtk.ApplicationWindow):
 
 
     def prev_track(self):
+        # turn off pause if necessary
+        self.pause_off()
+        
         # cancel the image timer
         if self.glib_timer and self.timer_active:
             GLib.source_remove(self.glib_timer)
@@ -211,7 +205,7 @@ class MainWindow(Gtk.ApplicationWindow):
             self.renderer._mpv.command("stop")
         
         # decrement the track number by 1
-        # if at beginning of tracks, then set track number to first track
+        # if at beginning of tracks, then set track number to 0
         self.track_number -= 1
         if self.track_number == -1:
             self.track_number = 0
@@ -231,7 +225,8 @@ class MainWindow(Gtk.ApplicationWindow):
         # if already paused, then don't need to do anything
         if (self.paused):
             return
-        
+            
+        if self.verbose: print ("turning on pause", flush=True)
         self.paused = True
         
         if (self.current_track["type"] == "image"):
@@ -251,7 +246,8 @@ class MainWindow(Gtk.ApplicationWindow):
         # if already unpaused, then don't need to do anything
         if (not self.paused):
             return
-        
+            
+        if self.verbose: print ("turning off pause", flush=True)
         self.paused = False
         
         if (self.current_track["type"] == "image"):
@@ -309,6 +305,7 @@ class MainWindow(Gtk.ApplicationWindow):
         self.label.set_css_classes(['annot'])
         self.label.set_xalign(0)
         self.label.set_yalign(0)
+        self.label.set_margin_end(10)
         
         self.pause_label = Gtk.Label()
         self.pause_label.set_css_classes(['annot'])
@@ -340,6 +337,7 @@ class MainWindow(Gtk.ApplicationWindow):
         self.renderer = MPVRenderer(subfile=self.complete_path(self.current_track['subtitles-file']))
             
         self.renderer.connect("realize", self.on_renderer_ready)
+        # checking for "eof-reached" when video finishes
         self.renderer._mpv.observe_property('eof-reached', self.handlePropertyChange)
         # have to set size request, otherwise you get nothing
         self.renderer.set_size_request(1920,1080)
