@@ -333,8 +333,10 @@ class MainWindow(Gtk.ApplicationWindow):
         if self.verbose:
             print ("playing video "+self.current_track['location'], flush=True)
         
+        subfile = self.complete_path(self.current_track['subtitles-file'])
+        subfile.replace(":","\\:")
         # instantiate MPVRenderer and set subtitle path
-        self.renderer = MPVRenderer(subfile=self.complete_path(self.current_track['subtitles-file']))
+        self.renderer = MPVRenderer(subfile=subfile)
             
         self.renderer.connect("realize", self.on_renderer_ready)
         # checking for "eof-reached" when video finishes
