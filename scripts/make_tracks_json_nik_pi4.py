@@ -11,6 +11,7 @@ trackdict = {}
 extratext = {}
 
 def load_extra_text(dirpath):
+    global extratext
     extratext = {}
 
     if os.path.isfile(dirpath):
@@ -33,7 +34,7 @@ def process_image(imgfile):
             "location" : "+/"+imgfile,
             "trip-text" : triptext
             }
-    
+
     if bname in extratext:
         record["annot-text"] = extratext[bname]
 
@@ -53,16 +54,17 @@ def process_video(vidfile):
             }
     
     subtext = "\n".join(textwrap.wrap(subtext, width=53))
-    duration_string = subprocess.check_output("ffprobe -i "+vidfile+" -show_format -v quiet | grep duration", shell=True, text=True).strip()
-    ss = re.search('duration=(\d+?)\.(\d\d\d)', duration_string)
+    duration_string = subprocess.check_output("ffprobe -i \""+vidfile+"\" -show_format -v quiet | grep duration", shell=True, text=True).strip()
+    ss = re.search(r'duration=(\d+?)\.(\d\d\d)', duration_string)
     sec = ss.group(1)
     msec = ss.group(2)
 
+    
     subtitles_file = vidfile + ".srt"
     sf = open(subtitles_file,"w")
-    for i in range(sec+1):
+    for i in range(int(sec)+1):
         sf.write(f"{i+1}\n")
-        if i < sec:
+        if i < int(sec):
             sf.write(f"00:00:{i},000 --> 00:00:{i+1},000\n")
         elif msec != "000":
             sf.write(f"00:00:{i},000 --> 00:00:{i},{msec}\n")
@@ -85,17 +87,30 @@ def process_file(file):
     elif file.endswith(videxts):
         process_video(file)
     else:
-        print("ERROR: File format for file",file,"not recognized.")
+        print("WARNING: File format for file",file,"not recognized.")
 
 
 def process_dir(dirpath):
-    files = [f for f in os.path.listdir(dirpath) if os.path.isfile(join(dirpath, f))]
-
     dirpath = dirpath.rstrip("/")
+    dircontent = os.listdir(dirpath)
+    dircontent.sort()
+    files = [dirpath+"/"+f for f in dircontent if os.path.isfile(dirpath+"/"+f)]
+
     load_extra_text(dirpath)
 
     for file in files:
         process_file(file)
+
+
+
+if (len(sys.argv) < 3):
+    print("Usage: "+sys.argv[0]+" <json file> <media file> [media file ...]")
+    print("Must have json file and at least one media file.\nIf json file exists, it will append tracks to the json, otherwise it will create a new json file.")
+    sys.exit()
+
+if not sys.argv[1].endswith(".json"):
+    print("First argument must be a json file ending in '.json'.")
+    sys.exit()
 
 
 if (not os.path.exists(sys.argv[1])):
@@ -117,7 +132,7 @@ for path in sys.argv[2:]:
 
 
 
-json_object = json.dumps(trackdict, indent=4)
+json_object = json.dumps(trackdict, indent=2)
 with open(sys.argv[1], 'w') as outfile:
     outfile.write(json_object)
 
