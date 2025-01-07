@@ -18,7 +18,7 @@ def load_extra_text(dirpath):
         dirpath = os.path.dirname(dirpath)
 
     if os.path.exists(dirpath+"/extra_text.txt"):
-        efile = open(dirpath+"/extra_text.txt", "r")
+        efile = open(dirpath+"/extra_text.txt", "r", encoding='latin1')
         for fname in efile:
             fname = fname.strip()
             annot = efile.readline().strip()
@@ -52,7 +52,7 @@ def process_video(vidfile):
     record ={"type" : "video", 
             "location" : "+/"+vidfile,
             }
-    
+
     subtext = "\n".join(textwrap.wrap(subtext, width=53))
     duration_string = subprocess.check_output("ffprobe -i \""+vidfile+"\" -show_format -v quiet | grep duration", shell=True, text=True).strip()
     ss = re.search(r'duration=(\d+?)\.(\d\d\d)', duration_string)
@@ -133,6 +133,6 @@ for path in sys.argv[2:]:
 
 
 json_object = json.dumps(trackdict, indent=2)
-with open(sys.argv[1], 'w') as outfile:
+with open(sys.argv[1], 'w', encoding='latin1') as outfile:
     outfile.write(json_object)
 
