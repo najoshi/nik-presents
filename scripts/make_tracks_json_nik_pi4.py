@@ -116,7 +116,7 @@ if not sys.argv[1].endswith(".json"):
 if (not os.path.exists(sys.argv[1])):
     trackdict = {"tracks" : []}
 else:
-    with open(sys.argv[1], 'r') as jfile:
+    with open(sys.argv[1], 'r', encoding='latin1') as jfile:
         data = jfile.read()
     trackdict = json.loads(data)
 
