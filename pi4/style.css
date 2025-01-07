@@ -8,3 +8,19 @@
 .appbg {
     background: black;
 }
+
+.annotwide {
+    color: white;
+    font-size: 25px;
+    font-weight: bold;
+
+    text-shadow:
+        0.1em 0 black,
+        0 0.1em black,
+        -0.1em 0 black,
+        0 -0.1em black,
+        -0.1em -0.1em black,
+        -0.1em 0.1em black,
+        0.1em -0.1em black,
+        0.1em 0.1em black;
+}

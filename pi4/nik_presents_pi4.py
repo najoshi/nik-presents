@@ -38,6 +38,7 @@ class MainWindow(Gtk.ApplicationWindow):
 
         self.box = None
         self.box2 = None
+        self.overlay = None
         self.image = None
         self.renderer = None
         self.label = None
@@ -269,16 +270,10 @@ class MainWindow(Gtk.ApplicationWindow):
             print("image not found:",image_path)
 
         self.image = Gtk.Picture.new_for_filename(image_path)
-
-        # get the width and height of the image
-        image_width = self.image.get_paintable().get_intrinsic_width()
-        image_height = self.image.get_paintable().get_intrinsic_height()
-
-        self.pause_label = Gtk.Label()
-        self.pause_label.set_css_classes(['annot'])
-        self.pause_label.set_xalign(0)
-        self.pause_label.set_yalign(1)
         
+        # get the width of the image
+        image_width = self.image.get_paintable().get_intrinsic_width()
+            
         label_text = ""
         # if image is less than 1800 wide, then put text to left of image,
         # otherwise put it above image.
@@ -286,6 +281,14 @@ class MainWindow(Gtk.ApplicationWindow):
             label_text = self.current_track["trip-text"]
             if "annot-text" in self.current_track:
                 label_text += "\n\n" + self.current_track["annot-text"]
+
+            self.pause_label = Gtk.Label()
+            self.pause_label.set_css_classes(['annot'])
+            self.pause_label.set_xalign(0)
+            self.pause_label.set_yalign(1)
+            self.pause_label.set_margin_bottom(10)
+            self.pause_label.set_margin_start(10)
+
             self.box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
             self.box2 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
             self.box.set_css_classes(['appbg'])
@@ -309,36 +312,42 @@ class MainWindow(Gtk.ApplicationWindow):
             
             self.box.append(self.box2)
             self.box.append(self.image)
+            
+            # have to set size request, otherwise you get nothing
+            self.box.set_size_request(1920,1080)
+            self.canvas.put(self.box,0,0)
 
         else:
             label_text = self.current_track["trip-text"]
             if "annot-text" in self.current_track:
                 label_text += " - " + self.current_track["annot-text"]
-            self.box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-            self.box.set_css_classes(['appbg'])
+             
+             # use an overlay widget for wide pictures   
+            self.overlay = Gtk.Overlay()
+            self.overlay.set_css_classes(['appbg'])
 
             self.label = Gtk.Label(label=label_text)
-            # set label size based on centering the image vertically
-            lh = (1080 - image_height) / 2
-            self.label.set_size_request(-1, lh)
-            self.label.set_hexpand(True)
-            
+            self.label.set_halign(Gtk.Align.START)
+            self.label.set_valign(Gtk.Align.START)
+            self.label.set_margin_top(10)
+            self.label.set_margin_start(10)
+            self.label.set_css_classes(['annotwide'])
             self.label.set_wrap(True)
-            self.label.set_css_classes(['annot'])
-            self.label.set_xalign(0)
-            self.label.set_yalign(0)
-            self.label.set_margin_end(10)
+
+            self.pause_label = Gtk.Label()
+            self.pause_label.set_halign(Gtk.Align.START)
+            self.pause_label.set_valign(Gtk.Align.END)
+            self.pause_label.set_margin_bottom(10)
+            self.pause_label.set_margin_start(10)
+            self.pause_label.set_css_classes(['annotwide'])
+            self.pause_label.set_size_request(100,50)
             
-            self.pause_label.set_size_request(-1,lh)
+            self.overlay.set_size_request(1920,1080)
+            self.overlay.set_child(self.image)
+            self.overlay.add_overlay(self.label)
+            self.overlay.add_overlay(self.pause_label)
             
-            self.box.append(self.label)
-            self.box.append(self.image)
-            self.box.append(self.pause_label)
-            
-        
-        # have to set size request, otherwise you get nothing
-        self.box.set_size_request(1920,1080)
-        self.canvas.put(self.box,0,0)
+            self.canvas.put(self.overlay,0,0)
         
         # set a timer for the duration of the image
         self.glib_timer = GLib.timeout_add_seconds(self.duration, self.next_track)
