@@ -169,8 +169,6 @@ class MainWindow(Gtk.ApplicationWindow):
         
         # terminate the video
         if self.renderer:
-            # when video is stopped, the "eof-property" is changed to True
-            # which then activates the handlePropertyChange callback
             self.renderer._mpv.command("stop")
         
         # increment the track number by 1
