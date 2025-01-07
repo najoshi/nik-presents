@@ -24,6 +24,7 @@ def load_extra_text(dirpath):
             annot = efile.readline().strip()
 
             extratext[fname] = annot
+        efile.close()
 
 
 def process_image(imgfile):
