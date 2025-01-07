@@ -274,54 +274,70 @@ class MainWindow(Gtk.ApplicationWindow):
         image_width = self.image.get_paintable().get_intrinsic_width()
         image_height = self.image.get_paintable().get_intrinsic_height()
 
+        self.pause_label = Gtk.Label()
+        self.pause_label.set_css_classes(['annot'])
+        self.pause_label.set_xalign(0)
+        self.pause_label.set_yalign(1)
+        
         label_text = ""
         # if image is less than 1800 wide, then put text to left of image,
         # otherwise put it above image.
         if image_width < 1800:
-            label_text = self.current_track["trip-text"] + "\n\n" + self.current_track["annot-text"]
+            label_text = self.current_track["trip-text"]
+            if "annot-text" in self.current_track:
+                label_text += "\n\n" + self.current_track["annot-text"]
             self.box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
             self.box2 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
             self.box.set_css_classes(['appbg'])
+            self.box2.set_css_classes(['appbg'])
 
             self.label = Gtk.Label(label=label_text)
             # set label size based on centering the image horizontally
             self.label.set_size_request((1920 - image_width) / 2, -1)
             self.label.set_vexpand(True)
+            
+            self.label.set_wrap(True)
+            self.label.set_css_classes(['annot'])
+            self.label.set_xalign(0)
+            self.label.set_yalign(0)
+            self.label.set_margin_end(10)
+            
+            self.pause_label.set_size_request(100,50)
+            
+            self.box2.append(self.label)
+            self.box2.append(self.pause_label)
+            
+            self.box.append(self.box2)
+            self.box.append(self.image)
 
         else:
             label_text = self.current_track["trip-text"]
-            if self.current_track["annot-text"]:
+            if "annot-text" in self.current_track:
                 label_text += " - " + self.current_track["annot-text"]
             self.box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-            self.box2 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
             self.box.set_css_classes(['appbg'])
 
             self.label = Gtk.Label(label=label_text)
             # set label size based on centering the image vertically
-            self.label.set_size_request(-1, (1080 - image_height) / 2)
+            lh = (1080 - image_height) / 2
+            self.label.set_size_request(-1, lh)
             self.label.set_hexpand(True)
-
-        self.label.set_wrap(True)
-        self.label.set_css_classes(['annot'])
-        self.label.set_xalign(0)
-        self.label.set_yalign(0)
-        self.label.set_margin_end(10)
+            
+            self.label.set_wrap(True)
+            self.label.set_css_classes(['annot'])
+            self.label.set_xalign(0)
+            self.label.set_yalign(0)
+            self.label.set_margin_end(10)
+            
+            self.pause_label.set_size_request(-1,lh)
+            
+            self.box.append(self.label)
+            self.box.append(self.image)
+            self.box.append(self.pause_label)
+            
         
-        self.pause_label = Gtk.Label()
-        self.pause_label.set_css_classes(['annot'])
-        self.pause_label.set_xalign(0)
-        self.pause_label.set_yalign(0)
-        self.pause_label.set_size_request(100,50)
-        
-        self.box2.set_css_classes(['appbg'])
-        self.box2.append(self.label)
-        self.box2.append(self.pause_label)
-        
-        self.box.append(self.box2)
-        self.box.append(self.image)
         # have to set size request, otherwise you get nothing
         self.box.set_size_request(1920,1080)
-        
         self.canvas.put(self.box,0,0)
         
         # set a timer for the duration of the image
@@ -329,14 +345,17 @@ class MainWindow(Gtk.ApplicationWindow):
         self.timer_active = True
 
 
-    def play_video(self):        
+    def play_video(self):
+        # need to escape ":" because it is special character for mpv subtitles list
+        subfile = self.complete_path(self.current_track['subtitles-file']).replace(":","\\:")
+
         if self.verbose:
             print ("playing video "+self.current_track['location'], flush=True)
+            print("subtitle track:",subfile)
         
-        # need to escape ":" because it is special character for mpv subtitles list
         # instantiate MPVRenderer and set subtitle path
-        self.renderer = MPVRenderer(subfile=self.complete_path(self.current_track['subtitles-file']).replace(":","\\:"))
-            
+        self.renderer = MPVRenderer(subfile=subfile)
+
         self.renderer.connect("realize", self.on_renderer_ready)
         # checking for "eof-reached" when video finishes
         self.renderer._mpv.observe_property('eof-reached', self.handlePropertyChange)
