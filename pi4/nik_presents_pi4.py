@@ -376,7 +376,7 @@ class MainWindow(Gtk.ApplicationWindow):
     def on_renderer_ready(self, *_):
         video_path = self.complete_path(self.current_track['location'])
         if (not os.path.exists(video_path)):
-            print("image not found:",video_path)
+            print("video file not found:",video_path)
         self.renderer.play(video_path)
 
 
