@@ -320,7 +320,8 @@ class MainWindow(Gtk.ApplicationWindow):
             if "annot-text" in self.current_track:
                 label_text += " - " + self.current_track["annot-text"]
              
-             # use an overlay widget for wide pictures   
+             # use an overlay widget for wide pictures
+             # so that we can put label widgets directly on picture
             self.overlay = Gtk.Overlay()
             self.overlay.set_css_classes(['appbg'])
 
@@ -329,6 +330,8 @@ class MainWindow(Gtk.ApplicationWindow):
             self.label.set_valign(Gtk.Align.START)
             self.label.set_margin_top(10)
             self.label.set_margin_start(10)
+            # annotwide css class has outlining for the text
+            # so it shows up better on top of an image
             self.label.set_css_classes(['annotwide'])
             self.label.set_wrap(True)
 
