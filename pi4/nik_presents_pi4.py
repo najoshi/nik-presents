@@ -356,7 +356,7 @@ class MainWindow(Gtk.ApplicationWindow):
 
 
     def play_video(self):
-        # need to escape ":" because it is special character for mpv subtitles list
+        # need to escape ":" because it is a special character for mpv subtitles list
         subfile = self.complete_path(self.current_track['subtitles-file']).replace(":","\\:")
 
         if self.verbose:
