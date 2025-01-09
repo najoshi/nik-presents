@@ -162,12 +162,12 @@ class MainWindow(Gtk.ApplicationWindow):
         # turn off pause if necessary
         self.pause_off()
         
-        # cancel the image timer
+        # cancel the current image timer
         if self.glib_timer and self.timer_active:
             GLib.source_remove(self.glib_timer)
             self.timer_active = False
         
-        # terminate the video
+        # terminate the current video
         if self.renderer:
             self.renderer._mpv.command("stop")
         
@@ -194,12 +194,12 @@ class MainWindow(Gtk.ApplicationWindow):
         # turn off pause if necessary
         self.pause_off()
         
-        # cancel the image timer
+        # cancel the current image timer
         if self.glib_timer and self.timer_active:
             GLib.source_remove(self.glib_timer)
             self.timer_active = False
         
-        # terminate the video
+        # terminate the current video
         if self.renderer:
             self.renderer._mpv.command("stop")
         
