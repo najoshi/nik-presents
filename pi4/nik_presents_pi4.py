@@ -121,7 +121,7 @@ class MainWindow(Gtk.ApplicationWindow):
                 GLib.idle_add(self.prev_track)
                 
         elif (x>=640 and x<1280):
-            # touching middle third of screen pauses track
+            # touching middle third of screen pauses/unpauses track
             if (self.paused):
                 self.pause_off()
             else:
