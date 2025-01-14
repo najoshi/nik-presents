@@ -63,6 +63,7 @@ class MainWindow(Gtk.ApplicationWindow):
         evk_quit.connect("key-pressed", self.key_press)
         self.add_controller(evk_quit)
 
+        # set up capturing mouse clicks or screen touches
         evk_mouse = Gtk.GestureClick.new()
         evk_mouse.connect("pressed", self.onClick)
         self.add_controller(evk_mouse)
