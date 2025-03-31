@@ -170,7 +170,7 @@ class MainWindow(Gtk.ApplicationWindow):
         
         # terminate the current video
         if self.renderer:
-            self.renderer._mpv.command("stop")
+            self.renderer._mpv.command("quit")
         
         # increment the track number by 1
         # if at end of tracks, then shuffle tracks and
@@ -202,7 +202,7 @@ class MainWindow(Gtk.ApplicationWindow):
         
         # terminate the current video
         if self.renderer:
-            self.renderer._mpv.command("stop")
+            self.renderer._mpv.command("quit")
         
         # decrement the track number by 1
         # if at beginning of tracks, then set track number to 0
