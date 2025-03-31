@@ -18,7 +18,7 @@ def load_extra_text(dirpath):
         dirpath = os.path.dirname(dirpath)
 
     if os.path.exists(dirpath+"/extra_text.txt"):
-        efile = open(dirpath+"/extra_text.txt", "r")
+        efile = open(dirpath+"/extra_text.txt", "r", encoding='latin1')
         for fname in efile:
             fname = fname.strip()
             annot = efile.readline().strip()
