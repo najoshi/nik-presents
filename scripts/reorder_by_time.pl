@@ -25,6 +25,9 @@ sub do_reorder {
             $exif->ExtractInfo($file);
             if (($year,$month,$day,$hour,$min,$sec) = $file =~ /(\d\d\d\d)(\d\d)(\d\d)_(\d\d)(\d\d)(\d\d)\.mp4$/) {
                 $time = "$year:$month:$day $hour:$min:$sec";
+            } elsif ($file =~ /^.+\.MP4$/ || $file =~ /^.+\.MOV$/) {
+                #$time = $exif->GetValue('MediaCreateDate', 'ValueConv');
+                $time = $exif->GetValue('DateTimeOriginal', 'PrintConv');
             } else {
 			    $time = $exif->GetValue('DateTimeOriginal', 'PrintConv');
 			    if ($time eq "") {$time = $exif->GetValue('CreateDate', 'PrintConv');}

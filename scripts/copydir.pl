@@ -2,8 +2,6 @@
 
 use Tk;
 
-$mediadir = "/home/joshi/digital_media_frame/media"
-
 sub do_copy {
 
 foreach $dir (@ARGV) {
@@ -11,10 +9,12 @@ foreach $dir (@ARGV) {
 if ($dir =~ /^(.+)\/$/) {$dir = $1;}
 ($basedir) = $dir =~ /^.+\/(.+)$/;
 
-$destdir = "$mediadir/$basedir";
+$destdir = "/home/joshi/digital_media_frame_touch/copydir/$basedir";
 
 system ("mkdir \"$destdir\"");
 system ("cp --preserve \"$dir/\"*.jpg \"$dir/\"*.JPG \"$dir/\"*.jpeg \"$dir/\"*.JPEG \"$dir/\"*.png \"$dir/\"*.PNG \"$destdir\"");
+#print ("mkdir \"$destdir\"\n");
+#print ("cp --preserve \"$dir/\"*.jpg \"$dir/\"*.JPG \"$dir/\"*.jpeg \"$dir/\"*.JPEG \"$dir/\"*.png \"$dir/\"*.PNG \"$destdir\"\n");
 
 $lncom = "ln -t \"$destdir\" -s ";
 @exts = ("wmv","WMV","mpg","MPG","avi","AVI","mp4","MP4","mov","MOV","mpeg","MPEG");
@@ -25,7 +25,8 @@ foreach $ext (@exts) {
 	}
 }
 
-system ($lncom);
+system($lncom);
+#print("$lncom\n");
 
 }
 
