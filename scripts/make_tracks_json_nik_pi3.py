@@ -18,7 +18,7 @@ def load_extra_text(dirpath):
         dirpath = os.path.dirname(dirpath)
 
     if os.path.exists(dirpath+"/extra_text.txt"):
-        efile = open(dirpath+"/extra_text.txt", "r", encoding='latin1')
+        efile = open(dirpath+"/extra_text.txt", "r", encoding='UTF-8')
         for fname in efile:
             fname = fname.strip()
             annot = efile.readline().strip()
@@ -62,7 +62,7 @@ def process_video(vidfile):
 
     
     subtitles_file = vidfile + ".srt"
-    sf = open(subtitles_file,"w")
+    sf = open(subtitles_file,"w",encoding="UTF-8")
     for i in range(int(sec)+1):
         sf.write(f"{i+1}\n")
         if i < int(sec):
@@ -118,7 +118,7 @@ if not sys.argv[1].endswith(".json"):
 if (not os.path.exists(sys.argv[1])):
     trackdict = {"tracks" : []}
 else:
-    with open(sys.argv[1], 'r') as jfile:
+    with open(sys.argv[1], 'r', encoding="UTF-8") as jfile:
         data = jfile.read()
     trackdict = json.loads(data)
 
@@ -135,6 +135,6 @@ for path in sys.argv[2:]:
 
 
 json_object = json.dumps(trackdict, indent=2)
-with open(sys.argv[1], 'w') as outfile:
+with open(sys.argv[1], 'w', encoding="UTF-8") as outfile:
     outfile.write(json_object)
 
