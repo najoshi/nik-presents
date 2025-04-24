@@ -264,19 +264,24 @@ class MainWindow():
         img_width = self.img.width()
         if (img_width < 1800):
             text_width = int((1920 - img_width) / 27)
-            trip_wrapped_text = textwrap.fill(self.current_track["trip-text"],
-                                              width=text_width, break_long_words=False)
-            annot_wrapped_text = textwrap.fill(self.current_track["annot-text"],
-                                               width=text_width, break_long_words=False)
-            final_text = trip_wrapped_text+"\n\n"+annot_wrapped_text
+            final_text = textwrap.fill(self.current_track["trip-text"],
+                                       width=text_width, break_long_words=False)
+
+            if ("annot-text" in self.current_track and self.current_track["annot-text"] != ''):
+                annot_wrapped_text = textwrap.fill(self.current_track["annot-text"],
+                                                   width=text_width, break_long_words=False)
+                final_text = final_text+"\n\n"+annot_wrapped_text
+
             self.annot = self.canvas.create_text(1,10,text=final_text,anchor=NW,fill="white",
                                                  font=("Helvetica",20,"bold"))
         else:
             text_width = 140
             final_text = self.current_track["trip-text"]
-            if (self.current_track["annot-text"] != ''):
+
+            if ("annot-text" in self.current_track and self.current_track["annot-text"] != ''):
                 final_text += " - " + self.current_track["annot-text"]
             final_text = textwrap.fill(final_text, width=text_width, break_long_words=False)
+
             self.annot = self.canvas.create_text(1,10,text=final_text,anchor=NW,fill="white",
                                                  font=("Helvetica",20,"bold"))
             bbox = self.canvas.bbox(self.annot)
