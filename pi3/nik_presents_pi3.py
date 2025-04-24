@@ -23,7 +23,7 @@ class MainWindow():
         self.main.attributes("-fullscreen", True)
         self.main.bind("q", self.quit)
 
-        with open(jsonfile, 'r') as jfile:
+        with open(jsonfile, 'r', encoding="UTF-8") as jfile:
             data = jfile.read()
 
         self.tracks = json.loads(data)["tracks"]
