@@ -73,7 +73,7 @@ sub next_image {
             $extra_text =~ s/\n/ /g;
             $extra_text =~ s/  / /g;
 
-			open ($et, ">>$dir/extra_text.txt");
+			open ($et, ">> :encoding(UTF-8)", "$dir/extra_text.txt");
 			print $et "$bn\n$extra_text\n";
 			close ($et);
 		}
