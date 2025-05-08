@@ -5,6 +5,10 @@ use Tk;
 use Tk::JPEG;
 use List::Util qw(first);
 
+#use utf8;
+#use open ':encoding(utf8)';
+#binmode(STDOUT, ":utf8");
+
 my $GEOM = "1920x1080";
 my $extradir = "/home/joshi/digital_media_frame_touch/unprocessed_pics/extra";
 

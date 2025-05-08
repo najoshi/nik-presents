@@ -3,9 +3,11 @@ use warnings;
 use strict;
 use Tk;
 use Tk::JPEG;
+use utf8;
 
 my $GEOM = "1920x1080";
 my $MEDIADIR = "/home/joshi/digital_media_frame_touch/media";
+my $extradir = "/home/joshi/digital_media_frame_touch/unprocessed_pics/extra";
 
 if (scalar(@ARGV) != 1) {
 	print STDERR "Needs one argument.\n";
@@ -59,7 +61,7 @@ sub next_image {
 			$extra_text =~ s/\"/\'/g;
 
 			print "putting '$extra_text' into $elements[$selected_index[0]]/extra_text.txt\n";
-			open ($et, ">>", "$MEDIADIR/$elements[$selected_index[0]]/extra_text.txt");
+			open ($et, ">> :encoding(UTF-8)", "$MEDIADIR/$elements[$selected_index[0]]/extra_text.txt");
 			print $et "$bn\n$extra_text\n";
 			close ($et);
 		}
@@ -67,6 +69,10 @@ sub next_image {
 		system ("mv \"$dir/$bn\" \"$MEDIADIR/$elements[$selected_index[0]]\"");
 		$kept++;
 	}
+
+    elsif ($todo eq "move") {
+        system ("mv \"$files[$filenum]\" $extradir");
+    }
 
 	elsif ($todo eq "skip") {
 		system ("trash \"$files[$filenum]\"");
@@ -88,7 +94,7 @@ sub next_image {
 	$entry->focus;
 
 	if ($files[$filenum] =~ /jpe{0,1}g$/i) {$filename = $files[$filenum];}
-	else {$filename = "/home/joshi/digital_media_frame_touch/scripts/web-video-icon.jpg";}
+	else {$filename = "/home/joshi/digital_media_frame_touch/nik-presents/scripts/web-video-icon.jpg";}
 
 	$l1->configure (-text => "File ".($filenum+1)."/".scalar(@files));
 	$l2->configure (-text => "Kept: $kept   Skipped: $skipped");
@@ -140,7 +146,7 @@ if ($trf1 eq "" && $trf2 eq "") {
 
 my ($etf, $etext, $fn);
 if (-e "$dir/extra_text.txt") {
-	open ($etf, "<$dir/extra_text.txt");
+	open ($etf, "< :encoding(UTF-8)", "$dir/extra_text.txt");
 	while ($fn=<$etf>) {
 		chomp $fn;
 		$etext = <$etf>;
@@ -154,7 +160,7 @@ if (-e "$dir/extra_text.txt") {
 }
 
 if ($files[$filenum] =~ /jpe{0,1}g$/i || $files[$filenum] =~ /png$/i) {$filename = $files[$filenum];}
-else {$filename = "/home/joshi/digital_media_frame_touch/scripts/web-video-icon.jpg";}
+else {$filename = "/home/joshi/digital_media_frame_touch/nik-presents/scripts/web-video-icon.jpg";}
 
 ($basename) = $files[$filenum] =~ /^.+\/(.+?)$/;
 
@@ -174,15 +180,25 @@ $l2 = $fr2->Label(-text=>"Kept: $kept   Skipped: $skipped", -font => "helvetica 
 $l3 = $fr2->Label(-text=>$basename, -font => "helvetica 20")->pack();
 
 my $keep = $fr2->Button(-text => "Save", -command=> sub {next_image ("keep");})->pack(-expand=>1, -fill=>"both");
+my $mvex = $fr2->Button(-text => "Move to extra", -command=> sub {next_image ("move");})->pack(-expand=>1, -fill=>"both");
 
 # $next = $fr2->Button(-text => "Skip", -command=> sub {next_image ("skip");})->pack(-expand=>1, -fill=>"both");
 $mw->bind('<Control-Key-z>', sub {next_image ("skip");});
 
 $lb = $fr2->Scrolled("Listbox", -selectmode => "single", -width=>50, -scrollbars => "e", -height=>40, -exportselection=>"False")->pack();
 opendir my $dfh, "$MEDIADIR";
+#foreach my $d (readdir $dfh) {
+#    print Encode::decode_utf8($d) . "\n";
+#}
 my @folders = sort grep {$_ ne "." && $_ ne ".."} grep {-d "$MEDIADIR/$_"} readdir $dfh;
+
+my @folders_utf;
+foreach my $d (@folders) {
+    push(@folders_utf, Encode::decode_utf8($d));
+}
+
 closedir $dfh;
-$lb->insert('end', @folders);
+$lb->insert('end', @folders_utf);
 
 # my $redo1 = $fr2->Button(-text => "Rotate image 90 degrees clockwise", -command=> sub {redo_image(90);})->pack(-expand=>1, -fill=>"both");
 # my $redo2 = $fr2->Button(-text => "Rotate image 90 degrees counter-clockwise", -command=> sub {redo_image(270);})->pack(-expand=>1, -fill=>"both");
