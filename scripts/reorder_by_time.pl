@@ -28,6 +28,8 @@ sub do_reorder {
             } elsif ($file =~ /^.+\.MP4$/ || $file =~ /^.+\.MOV$/) {
                 #$time = $exif->GetValue('MediaCreateDate', 'ValueConv');
                 $time = $exif->GetValue('DateTimeOriginal', 'PrintConv');
+                if ($time eq "") {$time = $exif->GetValue('CreateDate', 'PrintConv');}
+                if ($time eq "") {print STDERR "Time Not Found for file $file.\n";}
             } else {
 			    $time = $exif->GetValue('DateTimeOriginal', 'PrintConv');
 			    if ($time eq "") {$time = $exif->GetValue('CreateDate', 'PrintConv');}
