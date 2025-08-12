@@ -4,6 +4,7 @@ use strict;
 use Tk;
 use Tk::JPEG;
 use List::Util qw(first);
+use File::Basename;
 
 #use utf8;
 #use open ':encoding(utf8)';
@@ -21,6 +22,7 @@ my $dir = $ARGV[0];
 if ($dir =~ /^(.+)\/$/) {$dir = $1;}
 
 my $mw = new MainWindow;
+$mw->title(basename($dir));
 $mw->geometry ("1920x1080");
 my @files = <"$dir/*">;
 @files = sort grep {$_ =~ /jpe{0,1}g$/i || $_ =~ /png$/i || $_ =~ /mpe{0,1}g$/i || $_ =~ /avi$/i || $_ =~ /mp4$/i || $_ =~ /mov$/i} @files;
