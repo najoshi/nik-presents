@@ -106,8 +106,8 @@ def process_dir(dirpath):
 
 
 if (len(sys.argv) < 3):
-    print("Usage: "+sys.argv[0]+" <json file> <media file> [media file ...]")
-    print("Must have json file and at least one media file.\nIf json file exists, it will append tracks to the json, otherwise it will create a new json file.")
+    print("Usage: "+sys.argv[0]+" <json file> <media file or dir> [media file or dir...]")
+    print("Must have json file and at least one media file or media directory.\nIf json file exists, it will append tracks to the json, otherwise it will create a new json file.")
     sys.exit()
 
 if not sys.argv[1].endswith(".json"):
