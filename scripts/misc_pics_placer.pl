@@ -4,10 +4,17 @@ use strict;
 use Tk;
 use Tk::JPEG;
 use utf8;
+use List::MoreUtils;
 
 my $GEOM = "1920x1080";
 my $MEDIADIR = "/home/joshi/digital_media_frame_touch/media";
 my $extradir = "/home/joshi/digital_media_frame_touch/unprocessed_pics/extra";
+
+my $gps="";
+my ($deg1,$min1,$sec1,$dir1);
+my ($deg2,$min2,$sec2,$dir2);
+my ($lat, $lon, $latnum, $lonnum);
+
 
 if (scalar(@ARGV) != 1) {
 	print STDERR "Needs one argument.\n";
@@ -36,17 +43,18 @@ my $fr2;
 my $l1;
 my $l2;
 my $l3;
+my $l8;
 my $lb;
 my $skipped=0;
 my $basename;
 my %ethash;
+my @elements;
 
 sub next_image {
 	my ($todo) = @_;
 	my ($bn) = $files[$filenum] =~ /.+\/(.+)$/;
 	my $et;
 	my @selected_index;
-	my @elements;
 
 	if ($todo eq "keep") {
 		@selected_index = $lb->curselection();
@@ -99,6 +107,10 @@ sub next_image {
 	$l1->configure (-text => "File ".($filenum+1)."/".scalar(@files));
 	$l2->configure (-text => "Kept: $kept   Skipped: $skipped");
 	$l3->configure (-text => $basename);
+    $gps = get_lat_lon($files[$filenum]);
+    $l8->delete("1.0","end");
+    $l8->Insert($gps);
+
 	$shot->read($filename);
 	$mw->update;
 
@@ -125,7 +137,7 @@ sub redo_image {
 
 	system ("cp \"$origfile\" \"$files[$filenum]\"");
 
-	#system ("eog \"$files[$filenum]\"");
+@elements = $lb->get(0, 'end');	#system ("eog \"$files[$filenum]\"");
 	system ("exifautotran \"$files[$filenum]\"");
 	system ("convert -rotate $deg -resize $GEOM \"$files[$filenum]\" \"$files[$filenum]\"");
 	$shot->blank;
@@ -133,6 +145,55 @@ sub redo_image {
         $mw->update;
 }
 
+
+sub save_to_select {
+    my ($savedir) = @_;
+    @elements = $lb->get(0, 'end');
+
+    #print "$savedir\n". join("\n",@elements). "\n";
+    my $diridx=0;
+    my $lbitem;
+
+    foreach $lbitem (@elements) {
+        if ($lbitem eq $savedir) {
+            last;
+        }
+        $diridx++;
+    }
+
+    # $diridx = firstidx {defined && $_ eq $savedir} @elements;
+    $lb->selectionClear(0, "end");
+    $lb->selectionSet($diridx);
+    next_image ("keep");
+}
+
+sub get_lat_lon {
+    my ($fname) = @_;
+    $gps="";
+    open(my $info, "~/bin/Image-ExifTool-12.98/exiftool \"$fname\" |");
+    while (<$info>) {
+        chomp;
+        #if (/GPS Position\s+: (.+)/) {$gps=$1; $gps=~s/deg/°/g; $gps=~s/ //g; $gps=~s/,/ /;}
+        if (/GPS Position\s+: (.+?), (.+)/) {
+            #print "$1\n$2\n";
+
+            $lat = $1;
+            $lon = $2;
+
+            ($deg1,$min1,$sec1,$dir1) = $lat =~ /^(\d+) deg (\d+)' (.+?)" (\w)/;
+            ($deg2,$min2,$sec2,$dir2) = $lon =~ /^(\d+) deg (\d+)' (.+?)" (\w)/;
+
+            $latnum = ($deg1 + ($min1/60) + ($sec1/3600)) * ($dir1 =~ /[WS]/ ? -1 : 1);
+            $lonnum = ($deg2 + ($min2/60) + ($sec2/3600)) * ($dir2 =~ /[WS]/ ? -1 : 1);
+
+            $gps = "$latnum, $lonnum";
+            #print "$gps\n";
+        }
+    }
+    close($info);
+
+    return($gps);
+}
 
 
 my $trf1 = `ls "$dir" | grep -E "resized|rotated"`;
@@ -168,16 +229,26 @@ else {$filename = "/home/joshi/digital_media_frame_touch/nik-presents/scripts/we
 $fr1 = $mw->Frame()->pack(-side=>"left");
 $shot = $fr1->Photo(-file => "$filename", -format => "jpeg", width=>1440); #get first one
 $button = $fr1->Button(-image => $shot)->pack(-anchor=>"sw", -side=>"left", -expand=>1, -fill=>"both");
-# $button = $fr1->Scrolled("Button", -scrollbars=>"s", -image => $shot)->pack();
+# $button = $fr1->Scrolled("Button", -scrollbars=>"s", -image => $shot)->pack();$listbox->selectionSet(first, ?last?) 
 
 $fr2 = $mw->Frame()->pack(-side=>"right");
 $entry = $fr2->Entry(-width => 35, -textvariable=>\$extra_text, -font => "helvetica 20")->pack();
-$entry->bind("<Return>" => sub {next_image ("keep");});
+$entry->bind("<Return>" => sub {save_to_select ("Misc");});
 if (exists $ethash{$basename}) {$entry->insert (0, $ethash{$basename});}
 
 $l1 = $fr2->Label(-text=>"File ".($filenum+1)."/".scalar(@files), -font => "helvetica 20")->pack();
 $l2 = $fr2->Label(-text=>"Kept: $kept   Skipped: $skipped", -font => "helvetica 20")->pack();
 $l3 = $fr2->Label(-text=>$basename, -font => "helvetica 20")->pack();
+
+$gps = get_lat_lon($files[$filenum]);
+
+print "GPS: $gps\n";
+
+$l8 = $fr2->Text(-width => 35, -height => 1, -font => "helvetica 15")->pack();
+$l8->Insert($gps);
+
+my $keep2 = $fr2->Button(-text => "Save to Misc", -command=> sub {save_to_select ("Misc");})->pack(-expand=>1, -fill=>"both");
+my $keep3 = $fr2->Button(-text => "Save to Welding Projects", -command=> sub {save_to_select ("Welding Projects");})->pack(-expand=>1, -fill=>"both");
 
 my $keep = $fr2->Button(-text => "Save", -command=> sub {next_image ("keep");})->pack(-expand=>1, -fill=>"both");
 my $mvex = $fr2->Button(-text => "Move to extra", -command=> sub {next_image ("move");})->pack(-expand=>1, -fill=>"both");
