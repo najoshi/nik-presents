@@ -25,7 +25,7 @@ my $mw = new MainWindow;
 $mw->title(basename($dir));
 $mw->geometry ("1920x1080");
 my @files = <"$dir/*">;
-@files = sort grep {$_ =~ /jpe{0,1}g$/i || $_ =~ /png$/i || $_ =~ /mpe{0,1}g$/i || $_ =~ /avi$/i || $_ =~ /mp4$/i || $_ =~ /mov$/i} @files;
+@files = sort grep {$_ =~ /jpe{0,1}g$/i || $_ =~ /png$/i || $_ =~ /mpe{0,1}g$/i || $_ =~ /avi$/i || $_ =~ /mp4$/i || $_ =~ /mov$/i || $_ =~ /mkv$/i} @files;
 
 my $filenum=0;
 my $shot;
@@ -225,6 +225,8 @@ if (-e "$dir/extra_text.txt") {
 #print "$fn\n$etext\n";
 	}
 	close ($etf);
+
+    #print "$tmpfn\n";
 
 #print "$dir/$fn\n";
     $filenum = first { $files[$_] eq "$dir/$tmpfn" } 0..$#files;
