@@ -23,12 +23,22 @@ def load_extra_text(dirpath):
             fname = fname.strip()
             annot = efile.readline().strip()
 
+            if (not fname or not annot):
+                print("ERROR: blank line in extra_text.txt. Not using.", file=sys.stderr)
+                extratext = {}
+                return
+
+
+            #print(f"{fname},{annot}")
+
             extratext[fname] = annot
 
 
 def process_image(imgfile):
     bname = os.path.basename(imgfile)
     triptext = os.path.basename(os.path.dirname(imgfile))
+
+    #print(f"bname is {bname}")
 
     record ={"type" : "image", 
             "location" : "+/"+imgfile,
@@ -124,7 +134,7 @@ else:
 
 
 for path in sys.argv[2:]:
-    print(path)
+    #print(path)
 
     if os.path.isdir(path):
         process_dir(path)

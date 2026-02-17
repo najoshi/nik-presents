@@ -233,7 +233,7 @@ $button = $fr1->Button(-image => $shot)->pack(-anchor=>"sw", -side=>"left", -exp
 
 $fr2 = $mw->Frame()->pack(-side=>"right");
 $entry = $fr2->Entry(-width => 35, -textvariable=>\$extra_text, -font => "helvetica 20")->pack();
-$entry->bind("<Return>" => sub {save_to_select ("Misc");});
+$entry->bind("<Return>" => sub {next_image ("keep");});
 if (exists $ethash{$basename}) {$entry->insert (0, $ethash{$basename});}
 
 $l1 = $fr2->Label(-text=>"File ".($filenum+1)."/".scalar(@files), -font => "helvetica 20")->pack();
