@@ -23,6 +23,9 @@ def load_extra_text(dirpath):
             fname = fname.strip()
             annot = efile.readline().strip()
 
+            if not os.path.exists(dirpath+"/"+fname):
+                print(f"ERROR: file {fname} does not exist.")
+
             if (not fname or not annot):
                 print("ERROR: blank line in extra_text.txt. Not using.", file=sys.stderr)
                 extratext = {}
