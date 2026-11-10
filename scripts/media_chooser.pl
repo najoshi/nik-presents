@@ -247,7 +247,7 @@ $button = $fr1->Button(-image => $shot)->pack(-anchor=>"sw", -side=>"left", -exp
 # $button = $fr1->Scrolled("Button", -scrollbars=>"s", -image => $shot)->pack();
 
 $fr2 = $mw->Frame()->pack(-side=>"right");
-$entry = $fr2->Text(-width => 35, -height => 4, -wrap => "word", -font => "helvetica 20")->pack();
+$entry = $fr2->Text(-width => 35, -height => 6, -wrap => "word", -font => "helvetica 20")->pack();
 $entry->bind("<Return>" => sub {next_image ("keep");});
 if (exists $ethash{$basename}) {$entry->Contents ($ethash{$basename});}
 
@@ -305,7 +305,7 @@ my $mvex = $fr2->Button(-text => "Move to extra", -command=> sub {next_image ("m
 # $mw->bind('<Control-Key-x>', sub {redo_image(90);});
 # $mw->bind('<Control-Key-b>', sub {redo_image(270);});
 
-my $copy_button = $fr2->Button(-text => "Copy Text Into Main Entry", -command=> sub {$entry->Contents($entry2->Contents);})->pack(-expand=>1, -fill=>"both");
+my $copy_button = $fr2->Button(-text => "Copy Text Into Main Entry", -command=> sub {$entry->Contents($entry2->Contents);})->pack(-expand=>1, -fill=>"both", -pady => [20, 0]);
 $entry2 = $fr2->Text(-width => 35, -height => 4, -wrap => "word", -font => "helvetica 20")->pack();
 
 $entry->focus;
