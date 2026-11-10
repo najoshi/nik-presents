@@ -306,7 +306,7 @@ my $mvex = $fr2->Button(-text => "Move to extra", -command=> sub {next_image ("m
 # $mw->bind('<Control-Key-b>', sub {redo_image(270);});
 
 my $copy_button = $fr2->Button(-text => "Copy Text Into Main Entry", -command=> sub {$entry->Contents($entry2->Contents);})->pack(-expand=>1, -fill=>"both", -pady => [20, 0]);
-$entry2 = $fr2->Text(-width => 35, -height => 4, -wrap => "word", -font => "helvetica 20")->pack();
+$entry2 = $fr2->Text(-width => 35, -height => 6, -wrap => "word", -font => "helvetica 20")->pack();
 
 $entry->focus;
 $mw->update;
